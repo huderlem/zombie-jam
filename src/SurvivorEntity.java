@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
@@ -11,6 +12,7 @@ public class SurvivorEntity extends Entity {
 
 	String state = "wait";
 	Vector2f facing = new Vector2f(1f, 0f);
+	Image texture;
 	
 	float walkingSpeed = 0.1f;
 	float smellRadius = 30.0f;

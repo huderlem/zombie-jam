@@ -49,7 +49,6 @@ public class Flashlight extends Entity {
 
 	@Override
 	protected void initTextures() {
-		texture = TextureManager.getTexture("textures/bomb.png");
 	}
 	
 	public void setDirection(GameplayState game) {

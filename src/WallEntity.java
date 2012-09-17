@@ -11,6 +11,7 @@ import org.newdawn.slick.geom.Vector2f;
 
 public class WallEntity extends Entity {
 	
+	Image texture;
 	
 	public WallEntity(Entity parent, float x, float y) {
 		super(parent);

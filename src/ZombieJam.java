@@ -28,6 +28,7 @@ public class ZombieJam extends StateBasedGame {
 		AppGameContainer app = new AppGameContainer(new ZombieJam());
 		app.setTargetFrameRate(100);
         app.setDisplayMode(800, 600, false);
+        //app.setVSync(true);
         app.start();
 
 	}

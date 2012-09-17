@@ -15,7 +15,6 @@ public abstract class Entity {
 	Hashtable<Integer, Entity> children = new Hashtable<Integer, Entity>();
 	
 	Vector2f position;
-	Image texture;
 	protected Shape mask;
 	
 	private int id;

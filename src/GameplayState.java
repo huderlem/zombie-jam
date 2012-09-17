@@ -93,14 +93,11 @@ public class GameplayState extends BasicGameState{
     	g.setDrawMode(Graphics.MODE_ALPHA_BLEND);
     	
     	terrain.renderFloor(g);
-    	//g.fill(player.flashlight.getMask());
     	
     	for (WallEntity e : EntityManager.wallEntities.values()) {
     		if (e.deleted == false)
     			e.render(g);
     	}
-    	
-    	g.setDrawMode(Graphics.MODE_NORMAL);
     	
     	for (ZombieEntity e : EntityManager.zombieEntities.values()) {
     		if (e.deleted == false)
@@ -112,8 +109,12 @@ public class GameplayState extends BasicGameState{
     			e.render(g);
     	}
     
+    	g.setDrawMode(Graphics.MODE_NORMAL);
+
+    	
     	player.render(g);
-		g.drawString(""+player.score, 0, 200);
+    	g.setColor(Color.cyan);
+		g.drawString("Score: "+player.score, 0, 200);
 	}
 
 	@Override

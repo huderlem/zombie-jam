@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
@@ -12,9 +13,12 @@ import org.newdawn.slick.geom.Vector2f;
 
 public class ZombieEntity extends Entity {
 
-	float walkingSpeed = .030f;
+	float walkingSpeed = .005f;
+	float chasingSpeed = .050f;
 	Vector2f facing;
 	Random rand = new Random();
+	
+	Image texture;
 	
 	String state = "wander";
 	int life = 2000;
@@ -111,7 +115,7 @@ public class ZombieEntity extends Entity {
 				}
 			}
 			
-			position.add(facing.normalise().scale(walkingSpeed*delta));
+			position.add(facing.normalise().scale(chasingSpeed*delta));
 		}
 	}
 	

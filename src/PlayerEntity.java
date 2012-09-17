@@ -1,9 +1,11 @@
 import java.util.ArrayList;
 
+import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
@@ -15,6 +17,8 @@ public class PlayerEntity extends Entity {
 	Flashlight flashlight;
 	Circle light;
 	float lightRadius = 30.0f;
+	
+	Animation anim;
 	
 	float walkingSpeed = .080f;
 	ArrayList<Integer> movementQueue = new ArrayList<Integer>();
@@ -53,12 +57,14 @@ public class PlayerEntity extends Entity {
 						break;
 					case Input.KEY_W:
 						movement = new Vector2f(0f, -walkingSpeed*delta);
+						anim.update(delta);
 						break;
 					case Input.KEY_D:
 						movement = new Vector2f(walkingSpeed*delta, 0f);
 						break;
 					case Input.KEY_S:
 						movement = new Vector2f(0f, walkingSpeed*delta);
+						anim.update(delta);
 						break;
 					default:
 						break;
@@ -70,7 +76,10 @@ public class PlayerEntity extends Entity {
 				}
 				i++;
 			}
+		} else {
+			anim.setCurrentFrame(0);
 		}
+		
 	}
 	
 	/*
@@ -94,13 +103,14 @@ public class PlayerEntity extends Entity {
 	@Override
 	public void render(Graphics g) {
 		super.render(g);
-		texture.draw(position.x, position.y, width, height);
-		//g.draw(light);
+		anim.draw(position.x, position.y, width, height);
 	}
 
 	@Override
 	protected void initTextures() {
-		texture = TextureManager.getTexture("textures/bomb.png");
+		SpriteSheet ss = new SpriteSheet(TextureManager.getTexture("textures/player-anim.png"), 16, 16);
+		anim = new Animation(ss, 100);
+		anim.setAutoUpdate(false);
 	}
 
 	@Override
@@ -154,7 +164,7 @@ public class PlayerEntity extends Entity {
 	}
 	
 	public float getSmellRadius() {
-		return 50f;
+		return light.radius;
 	}
 	
 }
