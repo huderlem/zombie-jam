@@ -89,7 +89,7 @@ public class ZombieEntity extends Entity {
 			i++;
 			if (i > 30) {
 				state = "dying";
-				break;
+				return;
 			}
 			nextMask = getNextMask(delta);
 		}
@@ -114,7 +114,6 @@ public class ZombieEntity extends Entity {
 					}
 				}
 			}
-			
 			position.add(facing.normalise().scale(chasingSpeed*delta));
 		}
 	}
@@ -202,7 +201,12 @@ public class ZombieEntity extends Entity {
 	}
 	
 	private Shape getNextMask(int delta) {
-		Vector2f nextPos = position.copy().add(facing.normalise().scale(walkingSpeed*delta));
+		float speed;
+		if (this.state == "pursuePlayer" || this.state == "pursueSurvivor")
+			speed = chasingSpeed;
+		else
+			speed = walkingSpeed;
+		Vector2f nextPos = position.copy().add(facing.normalise().scale(speed*delta));
 		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
 	}
 	
