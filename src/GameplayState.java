@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
 
+import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.*;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.Color;
@@ -30,11 +32,13 @@ public class GameplayState extends BasicGameState{
  
 	private int stateID = -1;
 	
-	public int numSurvivors = 5;
+	public int numSurvivors = 1;
 	public int survivorsLeft = numSurvivors;
-	public int numZombies = 2;
+	public int numZombies = 1;
 	
 	Random rand = new Random();
+	
+	Image alphaMap;
 	
 	
 	public GameplayState(int stateID) {
@@ -66,34 +70,39 @@ public class GameplayState extends BasicGameState{
     	input = gc.getInput();
     	terrain = new World(20, 20, new Integer(prop.getProperty("cellWidth")));
     	terrain.generateWalls();
-    	new ZombieEntity(null, 300f, 100f);
     	player = new PlayerEntity(null, 200f, 100f);
 		
     	initLevel();
+    	
+    	alphaMap = new Image(gc.getWidth(), gc.getHeight());
     	
 	}
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g)
 			throws SlickException {
-		// Build an alpha map out of the flashlight
-    	g.setDrawMode(Graphics.MODE_ALPHA_MAP);
-    	g.clearAlphaMap();
+		
+		// To create the lighting effects, several steps must happen.
+		// First, render_base() draws the entities and the environment.  Next, an alpha map 
+		// is created using the player's flashlight and other various things.  Lastly, a black
+		// rectangle is drawn over everything, but the rectangle is combined with the created alpha lighting
+		// to create the desired effects.
+		render_base(gc, sbg, g);
+    	render_alpha_map(gc, sbg, g); // comment both of these lines out to turn off lighting
+    	render_lighting(gc, sbg, g);
     	
-    	g.setColor(Color.black);
+    	// Display elements such as the score
+    	render_ui(gc, sbg, g);
+	}
+	
+	/*
+	 * Renders the game's entities and environment
+	 */
+	private void render_base(GameContainer gc, StateBasedGame sbg, Graphics g)
+			throws SlickException {
+		g.setDrawMode(Graphics.MODE_NORMAL);
     	
-    	player.flashlight.render(g);
-    	g.fill(player.light);
-    	
-    	for (SpotlightEntity e : EntityManager.spotlightEntities.values()) {
-    		if (e.deleted == false)
-    			e.render(g);
-    	}
-    	
-    	g.setDrawMode(Graphics.MODE_ALPHA_BLEND);
-    	
-    	terrain.renderFloor(g);
-    	
+		terrain.renderFloor(g);
     	for (WallEntity e : EntityManager.wallEntities.values()) {
     		if (e.deleted == false)
     			e.render(g);
@@ -108,12 +117,49 @@ public class GameplayState extends BasicGameState{
     		if (e.deleted == false)
     			e.render(g);
     	}
-    
-    	g.setDrawMode(Graphics.MODE_NORMAL);
-
-    	
     	player.render(g);
-    	g.setColor(Color.cyan);
+	}
+	
+	/*
+	 * Create an alpha map used to overlay the lighting effect.
+	 */
+	private void render_alpha_map(GameContainer gc, StateBasedGame sbg, Graphics g)
+			throws SlickException {
+		g.setDrawMode(Graphics.MODE_ALPHA_MAP);
+    	g.clearAlphaMap();
+    	GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+
+    	Graphics alphaG = alphaMap.getGraphics();
+    	alphaG.clear();
+    	
+    	alphaG.setColor(Color.black);
+    	player.flashlight.render(alphaG);
+    	alphaG.fill(player.light);
+    	    	
+    	for (SpotlightEntity e : EntityManager.spotlightEntities.values()) {
+    		if (e.deleted == false)
+    			e.render(alphaG);
+    	}
+    	
+    	g.drawImage(alphaMap, 0, 0);
+	}
+	
+	/*
+	 * Draws a black rectangle over everything.  The rectangle is combined with the created alpha map.
+	 */
+	private void render_lighting(GameContainer gc, StateBasedGame sbg, Graphics g)
+			throws SlickException {
+		g.setDrawMode(Graphics.MODE_ALPHA_BLEND);
+    	g.setColor(Color.black);
+    	GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_DST_ALPHA);
+    	
+    	g.fillRect(0, 0, gc.getWidth(), gc.getHeight());
+	}
+	
+	private void render_ui(GameContainer gc, StateBasedGame sbg, Graphics g)
+			throws SlickException {
+		g.setDrawMode(Graphics.MODE_NORMAL);
+    	g.setColor(Color.white);
 		g.drawString("Score: "+player.score, 0, 200);
 	}
 
