@@ -10,6 +10,4 @@ Setting up ZombieJam in Eclipse
 7. Now, right click on the project and select 'Properties'.
 8. Under 'Java Build Path', you need to add a few jars using the 'Add JARs' button.
 9. Add all of the JARs in the /lib/ folder in your newly-created project.
-10. Right click on lwjglw.jar under 'Referenced Libraries' and choose 'Properties'.  Under 'Native Library', set the location path to the /lib/ folder in your newly-created project.
-
-SHould be good now?
+10. Right click on lwjglw.jar under 'Referenced Libraries' and choose 'Properties'.  Under 'Native Library', set the location path to the /lib/lwjgl-natives/YOUR-OPERATING-SYSTEM.
