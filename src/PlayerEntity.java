@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -20,8 +21,8 @@ public class PlayerEntity extends Entity {
 	
 	Animation anim;
 	
-	float walkingSpeed = .080f;
-	ArrayList<Integer> movementQueue = new ArrayList<Integer>();
+	float walkingSpeed = .05f;
+	PriorityQueue<Vector2f> movementQueue = new PriorityQueue<Vector2f>();
 	
 	int score = 0;
 	
@@ -41,45 +42,26 @@ public class PlayerEntity extends Entity {
 	@Override
 	public void update(GameContainer gc, int delta, GameplayState game) {
 		super.update(gc, delta, game);
-		doMovement(delta, game);
-		
+		handleKeys(delta, gc.getInput());
+		doMovement(delta, game);		
 		centerLight();
 	}
 	
 	public void doMovement(int delta, GameplayState game) {
-		if (movementQueue.size() > 0) {
-			Vector2f movement = null;
-			int i = 0;
-			while (i < movementQueue.size()) {
-				switch (movementQueue.get(i)) {
-					case Input.KEY_A: 
-						movement = new Vector2f(-walkingSpeed*delta, 0f);
-						break;
-					case Input.KEY_W:
-						movement = new Vector2f(0f, -walkingSpeed*delta);
-						anim.update(delta);
-						break;
-					case Input.KEY_D:
-						movement = new Vector2f(walkingSpeed*delta, 0f);
-						break;
-					case Input.KEY_S:
-						movement = new Vector2f(0f, walkingSpeed*delta);
-						anim.update(delta);
-						break;
-					default:
-						break;
-				}
-				
-				if ( !collideWithWall(game.terrain, delta, movement)) {
+		Vector2f movement = movementQueue.poll();
+		//just in case? it shouldn't ever be null though
+		if (movement != null) {
+			//moving!
+			if (movement.equals(new Vector2f(0,0)) == false) {
+				if (!collideWithWall(game.terrain, delta, movement)) {
 					position.add(movement);
-					break;
 				}
-				i++;
+				anim.update(delta);
+			//not moving!
+			} else {
+				anim.setCurrentFrame(0);
 			}
-		} else {
-			anim.setCurrentFrame(0);
-		}
-		
+		} 
 	}
 	
 	/*
@@ -124,26 +106,22 @@ public class PlayerEntity extends Entity {
 		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
 	}
 	
-	public void handleKeyPress(int key, char c) {
-		// Check for WASD movement keys
-		if (key == Input.KEY_D || key == Input.KEY_W || key == Input.KEY_S || key == Input.KEY_A) {
-			// Insert a new movement to the beginning of the movement queue
-			if ( !movementQueue.contains(key) )
-			{
-				movementQueue.add(0, key);
-			}
+	public void handleKeys(int delta, Input input) {
+		Vector2f result = new Vector2f(0, 0);
+		//this has to be a series of separate if statements because they're not exclusive
+		if (input.isKeyDown(Input.KEY_W)) {
+			result = result.add(new Vector2f(0f, -walkingSpeed*delta));
+		} 
+		if (input.isKeyDown(Input.KEY_A)){
+			result = result.add(new Vector2f(-walkingSpeed*delta, 0f));
 		}
-	}
-	
-	public void handleKeyRelease(int key, char c) {
-		// Check for WASD movement keys
-		if (key == Input.KEY_D || key == Input.KEY_W || key == Input.KEY_S || key == Input.KEY_A) {
-			// Insert a new movement to the beginning of the movement queue
-			if ( movementQueue.contains(key) )
-			{
-				movementQueue.remove((Integer)key);
-			}
+		if (input.isKeyDown(Input.KEY_S)){
+			result = result.add(new Vector2f(0f, walkingSpeed*delta));
 		}
+		if (input.isKeyDown(Input.KEY_D)){
+			result = result.add(new Vector2f(walkingSpeed*delta, 0f));
+		}
+		movementQueue.add(result);
 	}
 	
 	public void handleMouseClicked(int button, int x, int y, int clickCount) {
