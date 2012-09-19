@@ -32,9 +32,13 @@ public class GameplayState extends BasicGameState{
  
 	private int stateID = -1;
 	
+	//a bunch of default values that get overridden by the config file
 	public int numSurvivors = 1;
 	public int survivorsLeft = numSurvivors;
-	public int numZombies = 1;
+	public int numZombies = 1;	
+	
+	public int worldXdim = 20;
+	public int worldYdim = 20;
 	
 	Random rand = new Random();
 	
@@ -58,11 +62,17 @@ public class GameplayState extends BasicGameState{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		//should we have a try except block and throw a nice error when stuff is missing, or just
+		//assume settings will always be properly formatted?
+		numZombies=new Integer(prop.getProperty("numZombies"));
+		numSurvivors=new Integer(prop.getProperty("numSurvivors"));
+		worldXdim=new Integer(prop.getProperty("worldXdim"));
+		worldYdim=new Integer(prop.getProperty("worldYdim"));
 		
     	input = gc.getInput();
-    	terrain = new World(20, 20, new Integer(prop.getProperty("cellWidth")));
+    	terrain = new World(worldXdim, worldYdim, new Integer(prop.getProperty("cellWidth")));
     	terrain.generateWalls();
-    	player = new PlayerEntity(null, 200f, 100f);
+    	player = new PlayerEntity(null, 200f, 100f, prop);
 		
     	initLevel();
     	

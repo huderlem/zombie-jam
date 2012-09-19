@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Properties;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -24,10 +25,12 @@ public class Flashlight extends Entity {
 	Graphics g = new Graphics();
 	
 	
-	public Flashlight(Entity parent) {
+	public Flashlight(Entity parent, Properties prop) {
 		super(parent);
 		position = new Vector2f(parent.position.x + parent.width/2, parent.position.y + parent.height/2);
-		
+		power = new Integer(prop.getProperty("flashlightPower"));
+		reach = new Float(prop.getProperty("flashlightReach"));
+		angle = new Integer(prop.getProperty("flashlightAngle"));
 		setMask();
 	}
 

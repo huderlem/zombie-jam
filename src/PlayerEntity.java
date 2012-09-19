@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.PriorityQueue;
+import java.util.Properties;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -17,26 +18,32 @@ public class PlayerEntity extends Entity {
 
 	Flashlight flashlight;
 	Circle light;
+	
+	//get overwritten by config file
 	float lightRadius = 30.0f;
+	float walkingSpeed = .05f;
+	
 	
 	Animation anim;
-	
-	float walkingSpeed = .05f;
+	//movement vectors (keys pressed by user)
 	PriorityQueue<Vector2f> movementQueue = new PriorityQueue<Vector2f>();
 	
 	int score = 0;
 	
 	
-	public PlayerEntity(Entity parent, float x, float y) {
+	public PlayerEntity(Entity parent, float x, float y, Properties prop) {
 		super(parent);
 		position = new Vector2f(x, y);
 		width = 16.0f;
 		height = 16.0f;
 		mask = new Rectangle(x, y, width, height);
 		
+		lightRadius = new Float(prop.getProperty("playerHaloRadius"));
+		walkingSpeed = new Float(prop.getProperty("playerSpeed"));
+		
 		Vector2f center = this.getCenterPos();
 		light = new Circle(center.x, center.y, lightRadius);
-		flashlight = new Flashlight(this);
+		flashlight = new Flashlight(this, prop);
 	}
 
 	@Override
