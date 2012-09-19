@@ -3,9 +3,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
@@ -19,6 +21,7 @@ public class ZombieEntity extends Entity {
 	Random rand = new Random();
 	
 	Image texture;
+	Animation anim;
 	
 	String state = "wander";
 	int life = 2000;
@@ -186,12 +189,14 @@ public class ZombieEntity extends Entity {
 	@Override
 	public void render(Graphics g) {
 		super.render(g);
-		texture.draw(position.x, position.y, width, height);
+		anim.draw(position.x, position.y, width, height);
 	}
 
 	@Override
 	protected void initTextures() {
-		texture = TextureManager.getTexture("textures/zombie-anim.gif");
+		SpriteSheet ss = new SpriteSheet(TextureManager.getTexture("textures/zombie-anim.gif"), 16, 16);
+		anim = new Animation(ss, 200);
+		anim.setAutoUpdate(true);
 	}
 
 	@Override
