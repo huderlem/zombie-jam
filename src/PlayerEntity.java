@@ -21,7 +21,7 @@ public class PlayerEntity extends Entity {
 	
 	Animation anim;
 	
-	float walkingSpeed = .09f;
+	float walkingSpeed = .05f;
 	PriorityQueue<Vector2f> movementQueue = new PriorityQueue<Vector2f>();
 	
 	int score = 0;
