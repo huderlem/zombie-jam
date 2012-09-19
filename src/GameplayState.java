@@ -44,15 +44,7 @@ public class GameplayState extends BasicGameState{
 	public GameplayState(int stateID) {
 		this.stateID = stateID;
 	}
-    
-    public void keyPressed(int key, char c) {
-    	player.handleKeyPress(key, c);
-    }
-    
-    public void keyReleased(int key, char c) {
-    	player.handleKeyRelease(key, c);
-    }
-    
+      
     public void mouseClicked(int button, int x, int y, int clickCount) {
     	player.handleMouseClicked(button, x, y, clickCount);
     }
