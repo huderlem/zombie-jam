@@ -191,7 +191,7 @@ public class ZombieEntity extends Entity {
 
 	@Override
 	protected void initTextures() {
-		texture = TextureManager.getTexture("textures/bomb.png");
+		texture = TextureManager.getTexture("textures/zombie-anim.gif");
 	}
 
 	@Override
