@@ -72,7 +72,7 @@ public class GameplayState extends BasicGameState{
     	input = gc.getInput();
 
 		terrain = new World(worldXdim, worldYdim, new Integer(prop.getProperty("cellWidth")));
-		terrain.generateWalls();
+		terrain.generateRoom();
     	player = new PlayerEntity(null, 200f, 100f, prop);
 		
     	initLevel();

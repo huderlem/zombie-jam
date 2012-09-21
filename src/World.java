@@ -107,7 +107,7 @@ public class World {
 	/*
 	 * Recursively
 	 */
-	private void placeWall(int i, int j, int width, int height, int iterations, int minRoomWidth, int doorwayWidth) {
+	private void placeWall(int i, int j, int width, int height, int minRoomWidth, int doorwayWidth) {
 		
 		// If the resolution of our room is too small, we'll stop subdividing
 		if (width < minRoomWidth*2+1 || height < minRoomWidth*2+1) { // Base case for recursive subdividing
@@ -151,20 +151,20 @@ public class World {
 			
 			if (horizontal) {
 				// Divide the left and right rooms
-				placeWall(i, j, wallI-i, height, iterations-1, minRoomWidth, doorwayWidth);
-				placeWall(wallI, j, i+width-wallI, height, iterations-1, minRoomWidth, doorwayWidth);
+				placeWall(i, j, wallI-i, height, minRoomWidth, doorwayWidth);
+				placeWall(wallI, j, i+width-wallI, height, minRoomWidth, doorwayWidth);
 			} else {
 				// Divide the top and bottom rooms
-				placeWall(i, j, width, wallJ-j, iterations-1, minRoomWidth, doorwayWidth);
-				placeWall(i, wallJ, width, j+height-wallJ, iterations-1, minRoomWidth, doorwayWidth);
+				placeWall(i, j, width, wallJ-j, minRoomWidth, doorwayWidth);
+				placeWall(i, wallJ, width, j+height-wallJ, minRoomWidth, doorwayWidth);
 			}
 			
 			// And that's how we do recursion!  Fun stuff, really.
 		}	
 	}
 	
-	public void generateRoom(int iterations) {
-		placeWall(0, 0, terrainGridWidth, terrainGridHeight, iterations, 4, 3);
+	public void generateRoom() {
+		placeWall(0, 0, terrainGridWidth, terrainGridHeight, 4, 3);
 		generateWalls();
 	}
 	
