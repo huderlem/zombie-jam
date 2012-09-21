@@ -16,8 +16,8 @@ public class WallEntity extends Entity {
 	public WallEntity(Entity parent, float x, float y) {
 		super(parent);
 		EntityManager.addWallEntity(this);
-		width = 20f;
-		height = 20.0f;
+		width = 16f;
+		height = 16f;
 		
 		position = new Vector2f(x, y);
 		mask = new Rectangle(x, y, width, height);

@@ -76,7 +76,7 @@ public class World {
 		
 		for (int i = 0; i < terrainGridHeight; i++) {
 			terrainGrid[0][i] = new WallEntity(null, 0, i*terrainCellWidth).id();
-			terrainGrid[terrainGridWidth-1][i] = new WallEntity(null, (terrainGridHeight-1)*terrainCellWidth, i*terrainCellWidth).id();
+			terrainGrid[terrainGridWidth-1][i] = new WallEntity(null, (terrainGridWidth-1)*terrainCellWidth, i*terrainCellWidth).id();
 		}
 		
 	}
@@ -90,6 +90,85 @@ public class World {
 			}
 		}
 	}
+	
+	/*
+	 * Helper for room generation.  Chooses the orientation a wall should be constructed.
+	 * Returns a 1 for horizontal or 0 for vertical.
+	 */
+	private int getOrientation(int width, int height) {
+		if (width > height) 
+			return 1; // Horizontal
+		else if (height > width)
+			return 0; // Vertical
+		else
+			return rand.nextInt(2);
+	}
+	
+	/*
+	 * Recursively
+	 */
+	private void placeWall(int i, int j, int width, int height, int iterations, int minRoomWidth, int doorwayWidth) {
+		
+		// If the resolution of our room is too small, we'll stop subdividing
+		if (width < minRoomWidth*2+1 || height < minRoomWidth*2+1) { // Base case for recursive subdividing
+			return;
+		} else {
+			// First determine the orientation we'll be dividing from
+			boolean horizontal = getOrientation(width, height) == 1;
+			
+			// Calculate the i, j coords for the start of the wall
+			int wallI = (i+minRoomWidth) + (horizontal ? rand.nextInt(width-2*minRoomWidth) : -minRoomWidth);
+			int wallJ = (j+minRoomWidth) + (horizontal ? -minRoomWidth : rand.nextInt(height-2*minRoomWidth));
+			
+			// Calculate the i, j coords for the opening in the wall
+			int openIndex = 1 + (horizontal ? rand.nextInt(height-doorwayWidth) : rand.nextInt(width-doorwayWidth));
+			
+			// Calculate the amount to move the wall when drawing it in
+			int dx = horizontal ? 0 : 1;
+			int dy = horizontal ? 1 : 0;
+
+			// Draw in the walls to the grid
+			for (int count = 0; count <= (horizontal ? height : width); count++) {
+				// Calculate which grid coords we're placing a wall into
+				int gridI = wallI+dx*count;
+				int gridJ = wallJ+dy*count;
+				
+				// Do some basic index bounds checking
+				if (gridI < 0 || gridI >= terrainGridWidth)
+					continue;
+				if (gridJ < 0 || gridJ >= terrainGridHeight)
+					continue;
+				
+				// Continue the loop if this is an opening in the wall
+				int openDiff = openIndex-count;
+				if (openDiff >= 0 & openDiff < doorwayWidth)
+					continue;
+				
+				// Don't place a new wall if one already exists here
+				if (terrainGrid[gridI][gridJ] == 0)
+					terrainGrid[gridI][gridJ] = new WallEntity(null, gridI*terrainCellWidth, gridJ*terrainCellWidth).id();
+			}
+			
+			if (horizontal) {
+				// Divide the left and right rooms
+				placeWall(i, j, wallI-i, height, iterations-1, minRoomWidth, doorwayWidth);
+				placeWall(wallI, j, i+width-wallI, height, iterations-1, minRoomWidth, doorwayWidth);
+			} else {
+				// Divide the top and bottom rooms
+				placeWall(i, j, width, wallJ-j, iterations-1, minRoomWidth, doorwayWidth);
+				placeWall(i, wallJ, width, j+height-wallJ, iterations-1, minRoomWidth, doorwayWidth);
+			}
+			
+			// And that's how we do recursion!  Fun stuff, really.
+		}	
+	}
+	
+	public void generateRoom(int iterations) {
+		placeWall(0, 0, terrainGridWidth, terrainGridHeight, iterations, 4, 3);
+		generateWalls();
+	}
+	
+	
 	
 	
 	

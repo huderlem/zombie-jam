@@ -60,8 +60,8 @@ public class GameplayState extends BasicGameState{
 		}
 		
     	input = gc.getInput();
-    	terrain = new World(20, 20, new Integer(prop.getProperty("cellWidth")));
-    	terrain.generateWalls();
+    	terrain = new World(50, 32, new Integer(prop.getProperty("cellWidth")));
+    	terrain.generateRoom(1);
     	player = new PlayerEntity(null, 200f, 100f);
 		
     	initLevel();
@@ -80,11 +80,11 @@ public class GameplayState extends BasicGameState{
 		// rectangle is drawn over everything, but the rectangle is combined with the created alpha lighting
 		// to create the desired effects.
 		render_base(gc, sbg, g);
-    	render_alpha_map(gc, sbg, g); // comment both of these lines out to turn off lighting
-    	render_lighting(gc, sbg, g);
+    	//render_alpha_map(gc, sbg, g); // comment both of these lines out to turn off lighting
+    	//render_lighting(gc, sbg, g);
     	
     	// Display elements such as the score
-    	render_ui(gc, sbg, g);
+    	//render_ui(gc, sbg, g);
 	}
 	
 	/*
