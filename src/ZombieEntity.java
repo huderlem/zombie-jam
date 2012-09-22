@@ -98,6 +98,7 @@ public class ZombieEntity extends Entity {
 		}
 		
 		position.add(facing.normalise().scale(walkingSpeed*delta));
+		anim.update(delta);
 	}
 	
 	private void doPursueEntityMovement(int delta, GameplayState game, Entity target) {
@@ -118,6 +119,7 @@ public class ZombieEntity extends Entity {
 				}
 			}
 			position.add(facing.normalise().scale(chasingSpeed*delta));
+			anim.update(delta*2);
 		}
 	}
 	
@@ -199,8 +201,10 @@ public class ZombieEntity extends Entity {
 	@Override
 	protected void initTextures() {
 		SpriteSheet ss = new SpriteSheet(TextureManager.getTexture("textures/zombie-anim.gif"), 16, 16);
-		anim = new Animation(ss, 200);
-		anim.setAutoUpdate(true);
+		int[] frames = {0, 0, 1, 0, 0, 0, 2, 0};
+		int[] durations = {130, 200, 130, 200};
+		anim = new Animation(ss, frames, durations);
+		anim.setAutoUpdate(false);
 	}
 
 	@Override
