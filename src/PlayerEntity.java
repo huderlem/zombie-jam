@@ -60,12 +60,26 @@ public class PlayerEntity extends Entity {
 		if (movement != null) {
 			//moving!
 			if (movement.equals(new Vector2f(0,0)) == false) {
-				if (!collideWithWall(game.terrain, delta, movement)) {
+				// First, see if the regular direction collides with anything
+				if (collideWithWall(game.terrain, delta, movement)) {
+					// Now, see if the horizontal component of the movement vector collides with anything
+					Vector2f axis = new Vector2f(movement.x, 0f);
+					if (collideWithWall(game.terrain, delta, axis)) {
+						// Lastly, see if the vertical component of the movement vector collides with anything
+						axis = new Vector2f(0f, movement.y);
+						if ( !collideWithWall(game.terrain, delta, axis) ) {
+							position.add(axis);
+						}
+					} else {
+						position.add(axis);
+					}
+				} else {
 					position.add(movement);
 				}
+				
 				anim.update(delta);
-			//not moving!
 			} else {
+				// not moving
 				anim.setCurrentFrame(0);
 			}
 		} 
@@ -80,8 +94,11 @@ public class PlayerEntity extends Entity {
 		for (int id : surroundingCells) {
 			// Only check collisions for occupied cells
 			if (id != 0) {
-				WallEntity other = (WallEntity)EntityManager.getEntity(id);
-				if (nextMask.intersects(other.getMask())) {
+				Shape mask = ((WallEntity)EntityManager.getEntity(id)).getMask();
+				if ( !(nextMask.getMaxY() < mask.getMinY() ||
+						nextMask.getMinY() > mask.getMaxY() ||
+						nextMask.getMaxX() < mask.getMinX() ||
+						nextMask.getMinX() > mask.getMaxX())) {
 					return true;
 				}
 			}

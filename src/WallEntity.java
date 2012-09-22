@@ -20,7 +20,7 @@ public class WallEntity extends Entity {
 		height = 16f;
 		
 		position = new Vector2f(x, y);
-		mask = new Rectangle(x, y, width, height);
+		mask = new Rectangle(x, y, width+1, height+1);
 	}
 	
 	

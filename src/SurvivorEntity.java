@@ -27,7 +27,7 @@ public class SurvivorEntity extends Entity {
 		position = new Vector2f(x, y);
 		width = 16.0f;
 		height = 16.0f;
-		mask = new Rectangle(position.x, position.y, width, height);
+		mask = new Rectangle(position.x, position.y, width+1, height+1);
 	}
 
 	@Override

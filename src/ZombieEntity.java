@@ -47,7 +47,7 @@ public class ZombieEntity extends Entity {
 			die(delta, game.player);
 		} else {
 			// If the zombie is within the smell radius of the player or in the flashlight, pursue the player.
-			if (GameplayState.player.position.distance(position) < GameplayState.player.getSmellRadius()) {
+			if (GameplayState.player.getCenterPos().distance(this.getCenterPos()) < GameplayState.player.getSmellRadius()) {
 				state = "pursuePlayer";
 			} else if (GameplayState.player.flashlight.getMask().contains(getMask())) { 
 				state = "pursuePlayer";
@@ -86,7 +86,7 @@ public class ZombieEntity extends Entity {
 		// Use a while loop to ensure success
 		int i = 0;
 		Shape nextMask = getNextMask(delta);
-		while (collideWithWall(game.terrain, delta, nextMask) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, nextMask) != null)
+		while (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, nextMask) != null)
 		{
 			facing.add(rand.nextInt(360));
 			i++;
@@ -104,13 +104,13 @@ public class ZombieEntity extends Entity {
 		if (!getMask().intersects(target.getMask())) {
 			// First, obtain the vector towards the entity
 			facing = target.position.copy().sub(position);
-			if (collideWithWall(game.terrain, delta, getNextMask(delta)) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null)
+			if (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null)
 			{
 				// Try to walk towards the entity without going into a wall
 				facing = getVerticalAxisVectorTowardsEntity(target);
-				if (collideWithWall(game.terrain, delta, getNextMask(delta)) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null) {
+				if (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null) {
 					facing = getHorizontalAxisVectorTowardsEntity(target);
-					if (collideWithWall(game.terrain, delta, getNextMask(delta)) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null) {
+					if (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null) {
 						// If both fail, just resort to wandering
 						doWanderMovement(delta, game);
 						return;
@@ -162,13 +162,17 @@ public class ZombieEntity extends Entity {
 	/*
 	 * Returns true if this entity collides with any wallEntity in the surrounding area.
 	 */
-	public boolean collideWithWall(World world, int delta, Shape mask) {
+	public boolean collideWithWall(World world, int delta) {
+		Shape nextMask = getNextMask(delta);
 		ArrayList<Integer> surroundingCells = world.getSurroundingCellContents(position.x, position.y);
 		for (int id : surroundingCells) {
 			// Only check collisions for occupied cells
 			if (id != 0) {
-				WallEntity other = (WallEntity)EntityManager.getEntity(id);
-				if (mask.intersects(other.getMask())) {
+				Shape mask = ((WallEntity)EntityManager.getEntity(id)).getMask();
+				if ( !(nextMask.getMaxY() < mask.getMinY() ||
+						nextMask.getMinY() > mask.getMaxY() ||
+						nextMask.getMaxX() < mask.getMinX() ||
+						nextMask.getMinX() > mask.getMaxX())) {
 					return true;
 				}
 			}
