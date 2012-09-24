@@ -73,8 +73,7 @@ public class GameplayState extends BasicGameState{
 
 		terrain = new World(worldXdim, worldYdim, new Integer(prop.getProperty("cellWidth")));
 		terrain.generateRoom();
-    	player = new PlayerEntity(null, 200f, 100f, prop);
-		
+    	player = new PlayerEntity(null, 20f, 20f, prop);		
     	initLevel();
     	
     	alphaMap = new Image(gc.getWidth(), gc.getHeight());
@@ -91,11 +90,11 @@ public class GameplayState extends BasicGameState{
 		// rectangle is drawn over everything, but the rectangle is combined with the created alpha lighting
 		// to create the desired effects.
 		render_base(gc, sbg, g);
-    	render_alpha_map(gc, sbg, g); // comment both of these lines out to turn off lighting
-    	render_lighting(gc, sbg, g);
+    	//render_alpha_map(gc, sbg, g); // comment both of these lines out to turn off lighting
+    	//render_lighting(gc, sbg, g);
     	
     	// Display elements such as the score
-    	render_ui(gc, sbg, g);
+    	//render_ui(gc, sbg, g);
 	}
 	
 	/*
@@ -105,8 +104,7 @@ public class GameplayState extends BasicGameState{
 			throws SlickException {
 		g.setDrawMode(Graphics.MODE_NORMAL);
     	
-		terrain.renderFloor(g);
-    	for (WallEntity e : EntityManager.wallEntities.values()) {
+    	for (GridSpace e : EntityManager.gridSpaceEntities.values()) {
     		if (e.deleted == false)
     			e.render(g);
     	}
@@ -195,7 +193,7 @@ public class GameplayState extends BasicGameState{
 			int i = rand.nextInt(terrain.terrainGridWidth-2) + 1;
 			int j = rand.nextInt(terrain.terrainGridHeight-2) + 1;
 			Vector2f loc = new Vector2f(i, j);
-			while (!locTaken(loc, takenPoints) && terrain.getCellContents((int)i, (int)j) != 0) {
+			while (!locTaken(loc, takenPoints) && terrain.getCellGridSpaceType(i, j) != 0) {
 				i = rand.nextInt(terrain.terrainGridWidth-2) + 1;
 				j = rand.nextInt(terrain.terrainGridHeight-2) + 1;
 				loc.set(i, j);
@@ -207,7 +205,7 @@ public class GameplayState extends BasicGameState{
 			int i = rand.nextInt(terrain.terrainGridWidth-2) + 1;
 			int j = rand.nextInt(terrain.terrainGridHeight-2) + 1;
 			Vector2f loc = new Vector2f(i, j);
-			while (!locTaken(loc, takenPoints) && terrain.getCellContents((int)i, (int)j) != 0) {
+			while (!locTaken(loc, takenPoints) && terrain.getCellGridSpaceType(i, j) != 0) {
 				i = rand.nextInt(terrain.terrainGridWidth-2) + 1;
 				j = rand.nextInt(terrain.terrainGridHeight-2) + 1;
 				loc.set(i, j);
@@ -227,6 +225,7 @@ public class GameplayState extends BasicGameState{
 		}
 		return false;
 	}
+		
 	
 	public void clearLevel() {
 		EntityManager.clear();

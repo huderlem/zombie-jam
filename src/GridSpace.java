@@ -8,21 +8,27 @@ import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 
+// TODO: change width variable to reference game_settings.properties in config
 
-public class WallEntity extends Entity {
+public class GridSpace extends Entity {
 	
 	Image texture;
+	public int type;	// 0=floor; 1=wall
+	private boolean shouldBeDrawn = true;
 	
-	public WallEntity(Entity parent, float x, float y) {
+	public GridSpace(Entity parent, int spaceType, float x, float y) {
 		super(parent);
-		EntityManager.addWallEntity(this);
+		EntityManager.addGridSpaceEntity(this);
 		width = 16f;
 		height = 16f;
 		
 		position = new Vector2f(x, y);
 		mask = new Rectangle(x, y, width+1, height+1);
+		type = spaceType;
+		
+		// Have to call this again because type isn't defined the first time when it's called in super()...
+		initTextures();
 	}
-	
 	
 	@Override
 	public void update(GameContainer gc, int delta, GameplayState game) {
@@ -31,14 +37,23 @@ public class WallEntity extends Entity {
 
 	@Override
 	public void render(Graphics g) {
-		super.render(g);
-		texture.draw(position.x, position.y, width, height);
+		if (shouldBeDrawn == true) {
+			super.render(g);
+			texture.draw(position.x, position.y, width, height);
+		}
 	}
 
 
 	@Override
 	protected void initTextures() {
-		texture = TextureManager.getTexture("textures/wall.png");
+		switch(type) {
+		case 0: // floor
+			texture = TextureManager.getTexture("textures/floor.png");
+			break;
+		case 1: // wall
+			texture = TextureManager.getTexture("textures/wall.png");
+			break;
+		}
 	}
 
 

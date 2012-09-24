@@ -55,13 +55,13 @@ public class SurvivorEntity extends Entity {
 	private void doPursuePlayerMovement(int delta, GameplayState game) {
 		// First, obtain the vector towards the player
 		facing = GameplayState.player.position.copy().sub(position);
-		if (collideWithWall(game.terrain, delta, getNextMask(delta)))
+		if (collideWithWall(game.terrain, delta))
 		{
 			// Try to walk towards the player without going into a wall
 			facing = getVerticalAxisVectorTowardsPlayer(GameplayState.player);
-			if (collideWithWall(game.terrain, delta, getNextMask(delta))) {
+			if (collideWithWall(game.terrain, delta)) {
 				facing = getHorizontalAxisVectorTowardsPlayer(GameplayState.player);
-				if (collideWithWall(game.terrain, delta, getNextMask(delta))) {
+				if (collideWithWall(game.terrain, delta)) {
 					return;
 				}
 			}
@@ -70,22 +70,6 @@ public class SurvivorEntity extends Entity {
 		position.add(facing.normalise().scale(walkingSpeed*delta));
 	}
 	
-	/*
-	 * Returns true if this entity collides with any wallEntity in the surrounding area.
-	 */
-	public boolean collideWithWall(World world, int delta, Shape mask) {
-		ArrayList<Integer> surroundingCells = world.getSurroundingCellContents(position.x, position.y);
-		for (int id : surroundingCells) {
-			// Only check collisions for occupied cells
-			if (id != 0) {
-				WallEntity other = (WallEntity)EntityManager.getEntity(id);
-				if (mask.intersects(other.getMask())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 	
 	private Vector2f getVerticalAxisVectorTowardsPlayer(PlayerEntity player) {
 		if (player.position.y < position.y)
@@ -117,7 +101,7 @@ public class SurvivorEntity extends Entity {
 		return mask;
 	}
 	
-	private Shape getNextMask(int delta) {
+	protected Shape getNextMask(int delta) {
 		Vector2f nextPos = position.copy().add(facing.normalise().scale(walkingSpeed*delta));
 		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
 	}

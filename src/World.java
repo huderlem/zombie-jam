@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.newdawn.slick.Graphics;
@@ -36,59 +37,93 @@ public class World {
 		terrainGrid[(int)(x/terrainCellWidth)][(int)(y/terrainCellWidth)] = id;
 	}
 	
+	/*
+	 * Returns the id of the GridSpace entity in the grid location specified by x, y
+	 */
 	public int getCellContents(float x, float y) {
 		if (x < 0 || x > terrainCellWidth*terrainGridWidth || y < 0 || y > terrainCellWidth*terrainGridHeight) {
 			System.err.println("Tried to get cell contents at invalid coords: ("+x+", "+y+")");
-			return 0;
+			return -1;
 		}
 		return terrainGrid[(int)(x/terrainCellWidth)][(int)(y/terrainCellWidth)];
 	}
 	
+	/*
+	 * Returns the id of the GridSpace entity in the grid location specified by i, j
+	 */
 	public int getCellContents(int i, int j) {
 		if (i < 0 || i > terrainGridWidth || j < 0 || j > terrainGridHeight) {
 			System.err.println("Tried to get cell contents at invalid cell coords: ("+i+", "+j+")");
-			return 0;
+			return -1;
 		} else
 			return terrainGrid[i][j];
 	}
 	
-	public ArrayList<Integer> getSurroundingCellContents(float x, float y) {
+	/*
+	 * Returns the type of the GridSpace entity in the grid location specified by x, y
+	 */
+	public int getCellGridSpaceType(float x, float y) {
+		if (x < 0 || x > terrainCellWidth*terrainGridWidth || y < 0 || y > terrainCellWidth*terrainGridHeight) {
+			System.err.println("Tried to get cell contents at invalid coords: ("+x+", "+y+")");
+			return -1;
+		}
+		return ((GridSpace)EntityManager.getEntity(terrainGrid[(int)(x/terrainCellWidth)][(int)(y/terrainCellWidth)])).type;
+	}
+	
+	/*
+	 * Returns the type of the GridSpace entity in the grid location specified by i, j
+	 */
+	public int getCellGridSpaceType(int i, int j) {
+		if (i < 0 || i > terrainGridWidth || j < 0 || j > terrainGridHeight) {
+			System.err.println("Tried to get cell contents at invalid cell coords: ("+i+", "+j+")");
+			return -1;
+		} else {
+			return ((GridSpace)EntityManager.getEntity(terrainGrid[i][j])).type;
+		}
+	}
+	
+	/*
+	 * Returns the list of GridSpace walls that are present in the 8 surrounding cells of x, y (FLOATS in world! -- NOT i, j coords)
+	 */
+	public ArrayList<GridSpace> getSurroundingCellWalls(float x, float y) {
 		int gridX = (int)(x/terrainCellWidth);
 		int gridY = (int)(y/terrainCellWidth);
 		
-		ArrayList<Integer> surroundingCells = new ArrayList<Integer>();
+		return getSurroundingCellWalls(gridX, gridY);
+	}	
+	
+	/*
+	 * Returns the list of GridSpace walls that are present in the 8 surrounding cells of (i, j)
+	 */
+	public ArrayList<GridSpace> getSurroundingCellWalls(int i, int j) {
+		ArrayList<GridSpace> surroundingCells = new ArrayList<GridSpace>();
 		// Iterate through the 8 surrounding cells--don't include the middle cell
-		for (int i = gridX-1; i <= gridX+1; i++) {
-			for (int j = gridY-1; j <= gridY+1; j++) {
-				if ( !(i == gridX && j == gridY) && i >= 0 && i < terrainGridWidth && j >= 0 && j < terrainGridHeight) {
-					surroundingCells.add(getCellContents(i, j));
+		for (int a = i-1; a <= i+1; a++) {
+			for (int b = j-1; b <= j+1; b++) {
+				// check the bounds of the grid
+				if ( !(a == i && b == j) && a >= 0 && a < terrainGridWidth && b >= 0 && b < terrainGridHeight) {
+					// We only care about the walls
+					GridSpace cell = ((GridSpace)EntityManager.getEntity(getCellContents(a, b)));
+					if (cell.type == 1) {
+						surroundingCells.add(cell);
+					}
 				}
 			}
 		}
 		return surroundingCells;
-	}	
+	}
 	
-	public void generateWalls() {	
+	private void placeOuterWalls() {	
 		for (int i = 0; i < terrainGridWidth; i++) {
-			terrainGrid[i][0] = new WallEntity(null, i*terrainCellWidth, 0).id();
-			terrainGrid[i][terrainGridHeight-1] = new WallEntity(null, i*terrainCellWidth, (terrainGridHeight-1)*terrainCellWidth).id();
+			terrainGrid[i][0] = new GridSpace(null, 1, i*terrainCellWidth, 0).id();
+			terrainGrid[i][terrainGridHeight-1] = new GridSpace(null, 1, i*terrainCellWidth, (terrainGridHeight-1)*terrainCellWidth).id();
 		}
 		
 		for (int i = 0; i < terrainGridHeight; i++) {
-			terrainGrid[0][i] = new WallEntity(null, 0, i*terrainCellWidth).id();
-			terrainGrid[terrainGridWidth-1][i] = new WallEntity(null, (terrainGridWidth-1)*terrainCellWidth, i*terrainCellWidth).id();
+			terrainGrid[0][i] = new GridSpace(null, 1, 0, i*terrainCellWidth).id();
+			terrainGrid[terrainGridWidth-1][i] = new GridSpace(null, 1, (terrainGridWidth-1)*terrainCellWidth, i*terrainCellWidth).id();
 		}
 		
-	}
-	
-	public void renderFloor(Graphics g) {
-		for (int i = 0; i < terrainGridWidth; i++){
-			for (int j = 0; j < terrainGridHeight; j++) {
-				if (terrainGrid[i][j] == 0) {
-					floorTexture.draw(i*terrainCellWidth, j*terrainCellWidth, terrainCellWidth, terrainCellWidth);
-				}
-			}
-		}
 	}
 	
 	/*
@@ -146,7 +181,7 @@ public class World {
 				
 				// Don't place a new wall if one already exists here
 				if (terrainGrid[gridI][gridJ] == 0)
-					terrainGrid[gridI][gridJ] = new WallEntity(null, gridI*terrainCellWidth, gridJ*terrainCellWidth).id();
+					terrainGrid[gridI][gridJ] = new GridSpace(null, 1, gridI*terrainCellWidth, gridJ*terrainCellWidth).id();
 			}
 			
 			if (horizontal) {
@@ -163,13 +198,23 @@ public class World {
 		}	
 	}
 	
-	public void generateRoom() {
-		placeWall(0, 0, terrainGridWidth, terrainGridHeight, 4, 3);
-		generateWalls();
+	private void placeFloorSpaces() {	
+		for (int i = 0; i < terrainGridWidth; i++) {
+			for (int j = 0; j < terrainGridHeight; j++) {
+				if (terrainGrid[i][j] == 0) { 
+					terrainGrid[i][j] = new GridSpace(null, 0, i*terrainCellWidth, j*terrainCellWidth).id();
+				}
+			}
+		}
+		
 	}
 	
-	
-	
+	public void generateRoom() {
+		placeWall(0, 0, terrainGridWidth, terrainGridHeight, 4, 3);
+		placeOuterWalls();
+		placeFloorSpaces();
+		EntityManager.syncEntities();
+	}	
 	
 	
 }

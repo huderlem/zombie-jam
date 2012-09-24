@@ -7,7 +7,7 @@ public class EntityManager {
 	private static int idCounter = 0;
 	static Hashtable<Integer, Entity> entities = new Hashtable<Integer, Entity>();
 	static Hashtable<Integer, ZombieEntity> zombieEntities = new Hashtable<Integer, ZombieEntity>();
-	static Hashtable<Integer, WallEntity> wallEntities = new Hashtable<Integer, WallEntity>();
+	static Hashtable<Integer, GridSpace> gridSpaceEntities = new Hashtable<Integer, GridSpace>();
 	static Hashtable<Integer, SurvivorEntity> survivorEntities = new Hashtable<Integer, SurvivorEntity>();
 	static Hashtable<Integer, SpotlightEntity> spotlightEntities = new Hashtable<Integer, SpotlightEntity>();
 	
@@ -35,8 +35,8 @@ public class EntityManager {
 		zombieEntities.put(idCounter, entityToAdd);
 	}
 	
-	public static void addWallEntity(WallEntity entityToAdd) {
-		wallEntities.put(idCounter, entityToAdd);
+	public static void addGridSpaceEntity(GridSpace entityToAdd) {
+		gridSpaceEntities.put(idCounter, entityToAdd);
 	}
 	
 	public static void addSurvivorEntity(SurvivorEntity entityToAdd) {
@@ -78,8 +78,8 @@ public class EntityManager {
 			Class<? extends Entity> eclass = e.getClass();
 			if (eclass.equals(ZombieEntity.class)) {
 				zombieEntities.put(e.id(), (ZombieEntity)e);
-			} else if (eclass.equals(WallEntity.class)) {
-				wallEntities.put(e.id(), (WallEntity)e);
+			} else if (eclass.equals(GridSpace.class)) {
+				gridSpaceEntities.put(e.id(), (GridSpace)e);
 			} else if (eclass.equals(SurvivorEntity.class)) {
 				survivorEntities.put(e.id(), (SurvivorEntity)e);
 			} else if (eclass.equals(SpotlightEntity.class)) {
@@ -97,8 +97,8 @@ public class EntityManager {
 			Class<? extends Entity> eclass = e.getClass();
 			if (eclass.equals(ZombieEntity.class)) {
 				zombieEntities.remove(e.id());
-			} else if (eclass.equals(WallEntity.class)) {
-				wallEntities.remove(e.id());
+			} else if (eclass.equals(GridSpace.class)) {
+				gridSpaceEntities.remove(e.id());
 			} else if (eclass.equals(SurvivorEntity.class)) {
 				survivorEntities.remove(e.id());
 			} else if (eclass.equals(SpotlightEntity.class)) {
@@ -114,7 +114,7 @@ public class EntityManager {
 		idCounter = 0;
 		entities.clear();
 		zombieEntities.clear();
-		wallEntities.clear();
+		gridSpaceEntities.clear();
 		survivorEntities.clear();
 		spotlightEntities.clear();
 		toAdd.clear();

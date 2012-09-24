@@ -161,26 +161,6 @@ public class ZombieEntity extends Entity {
 			return new Vector2f(1f, 0f);
 	}
 	
-	/*
-	 * Returns true if this entity collides with any wallEntity in the surrounding area.
-	 */
-	public boolean collideWithWall(World world, int delta) {
-		Shape nextMask = getNextMask(delta);
-		ArrayList<Integer> surroundingCells = world.getSurroundingCellContents(position.x, position.y);
-		for (int id : surroundingCells) {
-			// Only check collisions for occupied cells
-			if (id != 0) {
-				Shape mask = ((WallEntity)EntityManager.getEntity(id)).getMask();
-				if ( !(nextMask.getMaxY() < mask.getMinY() ||
-						nextMask.getMinY() > mask.getMaxY() ||
-						nextMask.getMaxX() < mask.getMinX() ||
-						nextMask.getMinX() > mask.getMaxX())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 	
 	private SpotlightEntity collideWithSpotlight(Collection<SpotlightEntity> spotlights, int delta, Shape mask) {
 		for (SpotlightEntity s : spotlights) {
@@ -213,7 +193,7 @@ public class ZombieEntity extends Entity {
 		return mask;
 	}
 	
-	private Shape getNextMask(int delta) {
+	protected Shape getNextMask(int delta) {
 		float speed;
 		if (this.state == "pursuePlayer" || this.state == "pursueSurvivor")
 			speed = chasingSpeed;

@@ -62,4 +62,30 @@ public abstract class Entity {
 		EntityManager.removeEntity(this);
 	}
 		
+	
+	/*
+	 * Returns true if this entity collides with any wallEntity in the surrounding area.
+	 */
+	public boolean collideWithWall(World world, int delta) {
+		Shape nextMask = getNextMask(delta);
+		ArrayList<GridSpace> surroundingWalls = world.getSurroundingCellWalls(position.x, position.y);
+		for (GridSpace wall : surroundingWalls) {
+			Shape mask = wall.getMask();
+			if ( !(nextMask.getMaxY() <= mask.getMinY() ||
+					nextMask.getMinY() >= mask.getMaxY() ||
+					nextMask.getMaxX() <= mask.getMinX() ||
+					nextMask.getMinX() >= mask.getMaxX())) {
+				System.out.println("nextMask.MAX-Y: "+nextMask.getMaxY()+", wall.MIN-Y: "+mask.getMinY()+"; "+(nextMask.getMaxY() < mask.getMinY()));
+				System.out.println("nextMask.MIN-Y: "+nextMask.getMinY()+", wall.MAX-Y: "+mask.getMaxY()+"; "+(nextMask.getMinY() > mask.getMaxY()));
+				System.out.println("nextMask.MAX-X: "+nextMask.getMaxX()+", wall.MIN-X: "+mask.getMinX()+"; "+(nextMask.getMaxX() < mask.getMinX()));
+				System.out.println("nextMask.MIN-X: "+nextMask.getMinX()+", wall.MAX-X: "+mask.getMaxX()+"; "+(nextMask.getMinX() > mask.getMaxX()));
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected Shape getNextMask(int delta) {
+		return mask;
+	}
 }

@@ -23,6 +23,8 @@ public class PlayerEntity extends Entity {
 	float lightRadius = 30.0f;
 	float walkingSpeed = .05f;
 	
+	Vector2f movement = new Vector2f(0f, 0f);
+	
 	
 	Animation anim;
 	//movement vectors (keys pressed by user)
@@ -55,23 +57,31 @@ public class PlayerEntity extends Entity {
 	}
 	
 	public void doMovement(int delta, GameplayState game) {
-		Vector2f movement = movementQueue.poll();
+		movement = movementQueue.poll();
+		Vector2f tempMovement = movement.copy();
 		//just in case? it shouldn't ever be null though
 		if (movement != null) {
 			//moving!
 			if (movement.equals(new Vector2f(0,0)) == false) {
 				// First, see if the regular direction collides with anything
-				if (collideWithWall(game.terrain, delta, movement)) {
+				
+				if (collideWithWall(game.terrain, delta)) {
+					System.out.println("Collided FIRST:");
 					// Now, see if the horizontal component of the movement vector collides with anything
-					Vector2f axis = new Vector2f(movement.x, 0f);
-					if (collideWithWall(game.terrain, delta, axis)) {
+					movement = new Vector2f(tempMovement.x, 0f);
+					if (collideWithWall(game.terrain, delta)) {
+						System.out.println("Collided HORZ:");
+
 						// Lastly, see if the vertical component of the movement vector collides with anything
-						axis = new Vector2f(0f, movement.y);
-						if ( !collideWithWall(game.terrain, delta, axis) ) {
-							position.add(axis);
+						movement = new Vector2f(0f, tempMovement.y);
+						if ( !collideWithWall(game.terrain, delta) ) {
+							position.add(movement);
+						} else {
+							System.out.println("Collided VERT:");
+
 						}
 					} else {
-						position.add(axis);
+						position.add(movement);
 					}
 				} else {
 					position.add(movement);
@@ -83,27 +93,6 @@ public class PlayerEntity extends Entity {
 				anim.setCurrentFrame(0);
 			}
 		} 
-	}
-	
-	/*
-	 * Returns true if this entity collides with any wallEntity in the surrounding area.
-	 */
-	public boolean collideWithWall(World world, int delta, Vector2f movement) {
-		Shape nextMask = getNextMask(delta, movement);
-		ArrayList<Integer> surroundingCells = world.getSurroundingCellContents(position.x, position.y);
-		for (int id : surroundingCells) {
-			// Only check collisions for occupied cells
-			if (id != 0) {
-				Shape mask = ((WallEntity)EntityManager.getEntity(id)).getMask();
-				if ( !(nextMask.getMaxY() < mask.getMinY() ||
-						nextMask.getMinY() > mask.getMaxY() ||
-						nextMask.getMaxX() < mask.getMinX() ||
-						nextMask.getMinX() > mask.getMaxX())) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -125,7 +114,7 @@ public class PlayerEntity extends Entity {
 		return mask;
 	}
 	
-	private Shape getNextMask(int delta, Vector2f movement) {
+	protected Shape getNextMask(int delta) {
 		Vector2f nextPos = position.copy().add(movement);
 		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
 	}
