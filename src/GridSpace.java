@@ -40,6 +40,10 @@ public class GridSpace extends Entity {
 		if (shouldBeDrawn == true) {
 			super.render(g);
 			texture.draw(position.x, position.y, width, height);
+			
+			// We assume that this won't be drawn every frame.  The flashlight's rays will set this to true if 
+			// it needs to be drawn.
+			//this.setShouldBeDrawn(false);
 		}
 	}
 
@@ -60,6 +64,10 @@ public class GridSpace extends Entity {
 	@Override
 	public Shape getMask() {
 		return mask;
+	}
+	
+	public void setShouldBeDrawn(boolean a) {
+		this.shouldBeDrawn = a;
 	}
 
 }
