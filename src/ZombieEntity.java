@@ -161,16 +161,6 @@ public class ZombieEntity extends Entity {
 			return new Vector2f(1f, 0f);
 	}
 	
-	
-	private SpotlightEntity collideWithSpotlight(Collection<SpotlightEntity> spotlights, int delta, Shape mask) {
-		for (SpotlightEntity s : spotlights) {
-			// Check the distance from spotlights for optimization here!
-			if (s.getMask().intersects(mask) || s.getMask().contains(mask)) {
-				return s;
-			}
-		}
-		return null;
-	}
 
 	@Override
 	public void render(Graphics g) {
