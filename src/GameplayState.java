@@ -8,16 +8,9 @@ import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.*;
-import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.BasicGame;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -43,6 +36,9 @@ public class GameplayState extends BasicGameState{
 	Random rand = new Random();
 	
 	Image alphaMap;
+	Graphics alphaG;
+	
+	static ArrayList<Shape> wallMasks = new ArrayList<Shape>();
 	
 	
 	public GameplayState(int stateID) {
@@ -77,6 +73,7 @@ public class GameplayState extends BasicGameState{
     	initLevel();
     	
     	alphaMap = new Image(gc.getWidth(), gc.getHeight());
+    	alphaG = alphaMap.getGraphics();
     	
 	}
 
@@ -130,13 +127,18 @@ public class GameplayState extends BasicGameState{
     	g.clearAlphaMap();
     	GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
-    	Graphics alphaG = alphaMap.getGraphics();
     	alphaG.clear();
     	
     	alphaG.setColor(Color.black);
     	player.flashlight.render(alphaG);
     	alphaG.fill(player.light);
-    	    	
+    	
+    	for (Shape s : GameplayState.wallMasks) {
+    		alphaG.fill(s);
+    	}
+    	
+    	GameplayState.wallMasks.clear();
+    	
     	for (SpotlightEntity e : EntityManager.spotlightEntities.values()) {
     		if (e.deleted == false)
     			e.render(alphaG);
