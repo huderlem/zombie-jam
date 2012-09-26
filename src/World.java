@@ -42,7 +42,7 @@ public class World {
 	 */
 	public int getCellContents(float x, float y) {
 		if (x < 0 || x > terrainCellWidth*terrainGridWidth || y < 0 || y > terrainCellWidth*terrainGridHeight) {
-			System.err.println("Tried to get cell contents at invalid coords: ("+x+", "+y+")");
+			//System.err.println("Tried to get cell contents at invalid coords: ("+x+", "+y+")");
 			return -1;
 		}
 		return terrainGrid[(int)(x/terrainCellWidth)][(int)(y/terrainCellWidth)];
@@ -53,7 +53,7 @@ public class World {
 	 */
 	public int getCellContents(int i, int j) {
 		if (i < 0 || i > terrainGridWidth || j < 0 || j > terrainGridHeight) {
-			System.err.println("Tried to get cell contents at invalid cell coords: ("+i+", "+j+")");
+			//System.err.println("Tried to get cell contents at invalid cell coords: ("+i+", "+j+")");
 			return -1;
 		} else
 			return terrainGrid[i][j];
@@ -64,7 +64,7 @@ public class World {
 	 */
 	public int getCellGridSpaceType(float x, float y) {
 		if (x < 0 || x > terrainCellWidth*terrainGridWidth || y < 0 || y > terrainCellWidth*terrainGridHeight) {
-			System.err.println("Tried to get cell contents at invalid coords: ("+x+", "+y+")");
+			//System.err.println("Tried to get cell contents at invalid coords: ("+x+", "+y+")");
 			return -1;
 		}
 		return ((GridSpace)EntityManager.getEntity(terrainGrid[(int)(x/terrainCellWidth)][(int)(y/terrainCellWidth)])).type;
@@ -75,7 +75,7 @@ public class World {
 	 */
 	public int getCellGridSpaceType(int i, int j) {
 		if (i < 0 || i > terrainGridWidth || j < 0 || j > terrainGridHeight) {
-			System.err.println("Tried to get cell contents at invalid cell coords: ("+i+", "+j+")");
+			//System.err.println("Tried to get cell contents at invalid cell coords: ("+i+", "+j+")");
 			return -1;
 		} else {
 			return ((GridSpace)EntityManager.getEntity(terrainGrid[i][j])).type;
@@ -215,6 +215,5 @@ public class World {
 		placeFloorSpaces();
 		EntityManager.syncEntities();
 	}	
-	
 	
 }
