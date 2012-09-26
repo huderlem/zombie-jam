@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 
 import org.newdawn.slick.GameContainer;
@@ -75,14 +76,23 @@ public abstract class Entity {
 					nextMask.getMinY() >= mask.getMaxY() ||
 					nextMask.getMaxX() <= mask.getMinX() ||
 					nextMask.getMinX() >= mask.getMaxX())) {
-				System.out.println("nextMask.MAX-Y: "+nextMask.getMaxY()+", wall.MIN-Y: "+mask.getMinY()+"; "+(nextMask.getMaxY() < mask.getMinY()));
-				System.out.println("nextMask.MIN-Y: "+nextMask.getMinY()+", wall.MAX-Y: "+mask.getMaxY()+"; "+(nextMask.getMinY() > mask.getMaxY()));
-				System.out.println("nextMask.MAX-X: "+nextMask.getMaxX()+", wall.MIN-X: "+mask.getMinX()+"; "+(nextMask.getMaxX() < mask.getMinX()));
-				System.out.println("nextMask.MIN-X: "+nextMask.getMinX()+", wall.MAX-X: "+mask.getMaxX()+"; "+(nextMask.getMinX() > mask.getMaxX()));
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	/*
+	 * Checks for a collision with a spotlightEntity
+	 */
+	public SpotlightEntity collideWithSpotlight(Collection<SpotlightEntity> spotlights, int delta, Shape mask) {
+		for (SpotlightEntity s : spotlights) {
+			// Check the distance from spotlights for optimization here!
+			if (s.getMask().intersects(mask) || s.getMask().contains(mask)) {
+				return s;
+			}
+		}
+		return null;
 	}
 	
 	protected Shape getNextMask(int delta) {
