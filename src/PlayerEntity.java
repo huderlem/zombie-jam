@@ -66,19 +66,14 @@ public class PlayerEntity extends Entity {
 				// First, see if the regular direction collides with anything
 				
 				if (collideWithWall(game.terrain, delta)) {
-					System.out.println("Collided FIRST:");
 					// Now, see if the horizontal component of the movement vector collides with anything
 					movement = new Vector2f(tempMovement.x, 0f);
 					if (collideWithWall(game.terrain, delta)) {
-						System.out.println("Collided HORZ:");
 
 						// Lastly, see if the vertical component of the movement vector collides with anything
 						movement = new Vector2f(0f, tempMovement.y);
 						if ( !collideWithWall(game.terrain, delta) ) {
 							position.add(movement);
-						} else {
-							System.out.println("Collided VERT:");
-
 						}
 					} else {
 						position.add(movement);
