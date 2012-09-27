@@ -17,7 +17,7 @@ import org.newdawn.slick.BigImage;
 public class Flashlight extends Entity {
 
 	private Vector2f direction = new Vector2f(1f, 0f);
-	int power = 10;
+	int power;
 	float reach;
 	private float angle;
 	
@@ -29,12 +29,12 @@ public class Flashlight extends Entity {
 	Graphics g = new Graphics();
 	
 	
-	public Flashlight(Entity parent, Properties prop) {
+	public Flashlight(Entity parent) {
 		super(parent);
 		position = new Vector2f(parent.position.x + parent.width/2, parent.position.y + parent.height/2);
-		power = new Integer(prop.getProperty("flashlightPower"));
-		reach = new Float(prop.getProperty("flashlightReach"));
-		angle = new Integer(prop.getProperty("flashlightAngle"));
+		power = new Integer(GameplayState.prop.getProperty("flashlightPower"));
+		reach = new Float(GameplayState.prop.getProperty("flashlightReach"));
+		angle = new Integer(GameplayState.prop.getProperty("flashlightAngle"));
 		setMask();
 	}
 
