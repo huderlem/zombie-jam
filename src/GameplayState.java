@@ -37,9 +37,7 @@ public class GameplayState extends BasicGameState{
 	
 	Image alphaMap;
 	Graphics alphaG;
-	
-	static ArrayList<Shape> wallMasks = new ArrayList<Shape>();
-	
+		
 	
 	public GameplayState(int stateID) {
 		this.stateID = stateID;
@@ -125,7 +123,8 @@ public class GameplayState extends BasicGameState{
 			throws SlickException {
 		g.setDrawMode(Graphics.MODE_ALPHA_MAP);
     	g.clearAlphaMap();
-    	GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+    	
+    	//GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ZERO);
 
     	alphaG.clear();
     	
@@ -133,16 +132,18 @@ public class GameplayState extends BasicGameState{
     	player.flashlight.render(alphaG);
     	alphaG.fill(player.light);
     	
-    	for (Shape s : GameplayState.wallMasks) {
-    		alphaG.fill(s);
+    	for (GridSpace s : EntityManager.litWalls.values()) {
+    		alphaG.setColor(s.getIlluminationAlpha());
+    		alphaG.fill(s.getMask());
     	}
     	
-    	GameplayState.wallMasks.clear();
-    	
+    	GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
     	for (SpotlightEntity e : EntityManager.spotlightEntities.values()) {
     		if (e.deleted == false)
     			e.render(alphaG);
     	}
+    	
+    	alphaG.setColor(Color.black);
     	
     	g.drawImage(alphaMap, 0, 0);
 	}
@@ -157,6 +158,8 @@ public class GameplayState extends BasicGameState{
     	GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_DST_ALPHA);
     	
     	g.fillRect(0, 0, gc.getWidth(), gc.getHeight());
+    	
+    	g.setDrawMode(Graphics.MODE_NORMAL);
 	}
 	
 	private void render_ui(GameContainer gc, StateBasedGame sbg, Graphics g)
