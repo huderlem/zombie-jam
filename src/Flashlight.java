@@ -131,9 +131,7 @@ public class Flashlight extends Entity {
 			
 				// If the ray hits a wall, we light up that wall and end the ray
 				if (hitWallID == -1 && contactedGridSpace.type == 1) {
-					hitWallID = contactedGridSpace.id();
-					// TODO:THIS IS EXTREMELEY INEFFICIENT BECAUSE MULTIPLE RAYS CAN HIT THE WALL SEVERAL TIMES AND INSERT DUPLICATE MASKS
-					GameplayState.wallMasks.add(contactedGridSpace.getMask());
+					contactedGridSpace.illuminateWall();
 					break;
 				}
 				
