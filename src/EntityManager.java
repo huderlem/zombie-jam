@@ -10,6 +10,8 @@ public class EntityManager {
 	static Hashtable<Integer, GridSpace> gridSpaceEntities = new Hashtable<Integer, GridSpace>();
 	static Hashtable<Integer, SurvivorEntity> survivorEntities = new Hashtable<Integer, SurvivorEntity>();
 	static Hashtable<Integer, SpotlightEntity> spotlightEntities = new Hashtable<Integer, SpotlightEntity>();
+	static Hashtable<Integer, GridSpace> litWalls = new Hashtable<Integer, GridSpace>();
+	
 	
 	static ArrayList<Entity> toAdd = new ArrayList<Entity>();
 	static ArrayList<Entity> toExpunge = new ArrayList<Entity>();
@@ -45,6 +47,12 @@ public class EntityManager {
 	
 	public static void addSpotlightEntity(SpotlightEntity entityToAdd) {
 		spotlightEntities.put(idCounter, entityToAdd);
+	}
+	
+	public static void addLitWallEntity(GridSpace entityToAdd) {
+		if (litWalls.containsKey(entityToAdd.id()) == false) {
+			litWalls.put(entityToAdd.id(), entityToAdd);
+		}
 	}
 	
 	public static int removeEntity(int id) {
