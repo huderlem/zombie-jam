@@ -21,7 +21,8 @@ public class ZombieEntity extends Entity {
 	Random rand = new Random();
 	
 	Image texture;
-	Animation anim;
+	Animation facingDown;
+	Animation facingUp;
 	
 	String state = "wander";
 	
@@ -98,7 +99,7 @@ public class ZombieEntity extends Entity {
 		}
 		
 		position.add(facing.normalise().scale(walkingSpeed*delta));
-		anim.update(delta);
+		this.getAnimation().update(delta);
 	}
 	
 	private void doPursueEntityMovement(int delta, GameplayState game, Entity target) {
@@ -119,7 +120,7 @@ public class ZombieEntity extends Entity {
 				}
 			}
 			position.add(facing.normalise().scale(chasingSpeed*delta));
-			anim.update(delta*2);
+			this.getAnimation().update(delta*2);
 		}
 	}
 	
@@ -165,16 +166,17 @@ public class ZombieEntity extends Entity {
 	@Override
 	public void render(Graphics g) {
 		super.render(g);
-		anim.draw(position.x, position.y, width, height);
+		this.getAnimation().draw(position.x, position.y, width, height);
 	}
 
 	@Override
 	protected void initTextures() {
 		SpriteSheet ss = new SpriteSheet(TextureManager.getTexture("textures/zombie-anim.gif"), 16, 16);
-		int[] frames = {0, 0, 1, 0, 0, 0, 2, 0};
-		int[] durations = {130, 200, 130, 200};
-		anim = new Animation(ss, frames, durations);
-		anim.setAutoUpdate(false);
+		
+		facingDown = new Animation(ss, new int[] {0, 0, 1, 0, 0, 0, 2, 0}, new int[] {130, 200, 130, 200});
+		facingDown.setAutoUpdate(false);
+		facingUp = new Animation(ss, new int[] {0, 1, 1, 1, 0, 1, 2, 1}, new int[] {130, 200, 130, 200});
+		facingUp.setAutoUpdate(false);
 	}
 
 	@Override
@@ -197,5 +199,19 @@ public class ZombieEntity extends Entity {
 		delete();
 		player.score += scoreValue;
 	}
+	
+	/*
+	 * Returns the appropriate Animation depending on the Zombie's current facing vector.
+	 */
+	private Animation getAnimation() {
+		double theta = facing.getTheta();
+		if (theta >= 180 && theta < 360) {
+			return facingUp;
+		} else {
+			return facingDown;
+		}
+	}
+	
+	
 
 }
