@@ -20,19 +20,19 @@ public class GameplayState extends BasicGameState{
 	
 	Input input = null;
 	World terrain;
-	Properties prop = new Properties();
 	static PlayerEntity player;
  
 	private int stateID = -1;
 	
 	//a bunch of default values that get overridden by the config file
-	public int numSurvivors = 1;
+	public int numSurvivors;
 	public int survivorsLeft = numSurvivors;
-	public int numZombies = 1;	
+	public int numZombies;	
 	
-	public int worldXdim = 20;
-	public int worldYdim = 20;
+	public int worldXdim;
+	public int worldYdim;
 	
+	static Properties prop = new Properties();
 	Random rand = new Random();
 	
 	Image alphaMap;
@@ -67,7 +67,7 @@ public class GameplayState extends BasicGameState{
 
 		terrain = new World(worldXdim, worldYdim, new Integer(prop.getProperty("cellWidth")));
 		terrain.generateRoom();
-    	player = new PlayerEntity(null, 20f, 20f, prop);		
+    	player = new PlayerEntity(null, 20f, 20f);		
     	initLevel();
     	
     	alphaMap = new Image(gc.getWidth(), gc.getHeight());

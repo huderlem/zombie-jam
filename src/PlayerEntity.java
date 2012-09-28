@@ -19,9 +19,9 @@ public class PlayerEntity extends Entity {
 	Flashlight flashlight;
 	Circle light;
 	
-	//get overwritten by config file
-	float lightRadius = 30.0f;
-	float walkingSpeed = .05f;
+	//get loaded by config file
+	float lightRadius;
+	float walkingSpeed;
 	
 	Vector2f movement = new Vector2f(0f, 0f);
 	
@@ -33,19 +33,19 @@ public class PlayerEntity extends Entity {
 	int score = 0;
 	
 	
-	public PlayerEntity(Entity parent, float x, float y, Properties prop) {
+	public PlayerEntity(Entity parent, float x, float y) {
 		super(parent);
 		position = new Vector2f(x, y);
 		width = 16.0f;
 		height = 16.0f;
 		mask = new Rectangle(x, y, width, height);
 		
-		lightRadius = new Float(prop.getProperty("playerHaloRadius"));
-		walkingSpeed = new Float(prop.getProperty("playerSpeed"));
+		lightRadius = new Float(GameplayState.prop.getProperty("playerHaloRadius"));
+		walkingSpeed = new Float(GameplayState.prop.getProperty("playerSpeed"));
 		
 		Vector2f center = this.getCenterPos();
 		light = new Circle(center.x, center.y, lightRadius);
-		flashlight = new Flashlight(this, prop);
+		flashlight = new Flashlight(this);
 	}
 
 	@Override

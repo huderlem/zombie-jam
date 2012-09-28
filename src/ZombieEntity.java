@@ -15,8 +15,8 @@ import org.newdawn.slick.geom.Vector2f;
 
 public class ZombieEntity extends Entity {
 
-	float walkingSpeed = .005f;
-	float chasingSpeed = .050f;
+	float walkingSpeed;
+	float chasingSpeed;
 	Vector2f facing;
 	Random rand = new Random();
 	
@@ -24,14 +24,14 @@ public class ZombieEntity extends Entity {
 	Animation anim;
 	
 	String state = "wander";
-	int life = 2000;
 	
 	static int scoreValue = 300;
 	
 	
 	public ZombieEntity(Entity parent, float x, float y) {
 		super(parent);
-		
+		walkingSpeed = new Float(GameplayState.prop.getProperty("zombieWalkSpeed"));
+		chasingSpeed = new Float(GameplayState.prop.getProperty("zombieChaseSpeed"));
 		position = new Vector2f(x, y);
 		width = 16.0f;
 		height = 16.0f;
@@ -192,13 +192,10 @@ public class ZombieEntity extends Entity {
 		Vector2f nextPos = position.copy().add(facing.normalise().scale(speed*delta));
 		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
 	}
-	
+
 	private void die(int delta, PlayerEntity player) {
-		life -= delta;
-		if (life < 0) {
-			delete();
-			player.score += scoreValue;
-		}
+		delete();
+		player.score += scoreValue;
 	}
 
 }
