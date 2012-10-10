@@ -93,7 +93,7 @@ public abstract class MobileEntity extends Entity {
 		else 
 			return new Vector2f(1f, 0f);
 	}
-	//expects a list of scary things. finds the midpoint of the scary things and finds
+	//finds the midpoint of the scary things and finds
 	//a vector away from said point. 
 	protected Vector2f faceAwayFrom(Collection<Shape> scaryThings){
 		Vector2f safeHeading;
@@ -112,6 +112,8 @@ public abstract class MobileEntity extends Entity {
 		safeHeading = new Vector2f(myX - avgX, myY-avgY);
 		return safeHeading;		
 	}
+	
+	//same, but when there's only one scary thing and its an entity
 	protected Vector2f faceAwayFrom(Entity scaryThing) {
 		Vector2f safeHeading;
 		float myX = this.getCenterX();

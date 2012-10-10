@@ -129,7 +129,7 @@ public class PlayerEntity extends MobileEntity {
 	}
 	
 	public void handleMouseClicked(int button, int x, int y, int clickCount) {
-		// Check for command to survivors to follow the player
+		// Check for command to survivors to follow the playercd 
 		if (button == 0) {
 			for (SurvivorEntity e : EntityManager.survivorEntities.values()) {
 				if ( e.state.equals("wait") && flashlight.illuminated(e) != null) {
