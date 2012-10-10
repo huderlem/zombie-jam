@@ -13,120 +13,96 @@ import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 
 
-public class ZombieEntity extends Entity {
-
-	float walkingSpeed;
+public class ZombieEntity extends MobileEntity {
 	float chasingSpeed;
-	Vector2f facing;
-	Random rand = new Random();
 	
-	Image texture;
-	Animation facingDown;
-	Animation facingUp;
-	
-	String state = "wander";
-	
-	static int scoreValue = 300;
-	
-	
+	//number of frames left in a zombie's desire to chase after its target has stopped aggro-ing.
+	int remainingChaseTime;
+	static int chaseTime;
 	public ZombieEntity(Entity parent, float x, float y) {
-		super(parent);
-		walkingSpeed = new Float(GameplayState.prop.getProperty("zombieWalkSpeed"));
-		chasingSpeed = new Float(GameplayState.prop.getProperty("zombieChaseSpeed"));
-		position = new Vector2f(x, y);
-		width = 16.0f;
-		height = 16.0f;
-		facing = new Vector2f(rand.nextInt(360));
-		mask = new Rectangle(x, y, width, height);
+		super(parent, x, y);
+		chaseTime = new Integer(GameplayState.prop.getProperty("zomChaseTime"));
+		chasingSpeed = new Float(GameplayState.prop.getProperty("zomChaseSpeed"));
+		walkingSpeed = new Float(GameplayState.prop.getProperty("zomWalkSpeed"));
+		state = "wander";
 	}
 
 	@Override
 	public void update(GameContainer gc, int delta, GameplayState game) {
-		super.update(gc, delta, game);
-		
+		super.update(gc, delta, game);		
 		if (state == "dying") {
 			die(delta, game.player);
-		} else {
+		} else if (GameplayState.player.flashlight.illuminated(this) == null && collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) == null) {
+			remainingChaseTime -= 1 * delta;
 			// If the zombie is within the smell radius of the player or in the flashlight, pursue the player.
 			if (GameplayState.player.getCenterPos().distance(this.getCenterPos()) < GameplayState.player.getSmellRadius()) {
+				remainingChaseTime = chaseTime * delta;
 				state = "pursuePlayer";
-			} else if (GameplayState.player.flashlight.getMask().contains(getMask())) { 
-				state = "pursuePlayer";
-			} else {
-				state = "wander";
-			}
+			} 
 			
 			SurvivorEntity nearestSurvivor = getNearSurvivor(EntityManager.survivorEntities.values());
 			if ( !state.equals("pursuePlayer") && nearestSurvivor != null) {
+				remainingChaseTime = chaseTime * delta;
+				nearestSurvivor.fleeFrom(this);
 				state = "pursueSurvivor";
 			} 
 			
-			doMovement(delta, game);
-			
-			if (state.equals("pursueSurvivor")) {
+			if (state.equals("pursueSurvivor") && nearestSurvivor != null) {
 				if (getMask().intersects(nearestSurvivor.getMask())) {
+					remainingChaseTime = 0;
 					nearestSurvivor.convertToZombie(game, delta);
+					state = "wander";
 				}
 			}
-		}
-	}
-		
-	private void doMovement(int delta, GameplayState game) {
-		if (state.equals("wander")) {
-			doWanderMovement(delta, game);
-		} else if (state.equals("pursuePlayer")) {
-			doPursuePlayerMovement(delta, game);
-		} else if (state.equals("pursueSurvivor")) {
-			doPursueSurvivorMovement(delta, game);
-		} else if (state.equals("dying")) {
-		}
-	}
-	
-	private void doWanderMovement(int delta, GameplayState game) {
-		// If this zombie is going to hit a wall, set its facing vector to a randomly-chosen direction.
-		// Use a while loop to ensure success
-		int i = 0;
-		Shape nextMask = getNextMask(delta);
-		while (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, nextMask) != null)
-		{
-			facing.add(rand.nextInt(360));
-			i++;
-			if (i > 30) {
-				state = "dying";
-				return;
+			
+			if (remainingChaseTime <= 0) {
+				remainingChaseTime = 0;
+				state = "wander";
 			}
-			nextMask = getNextMask(delta);
+			
+		//not dead, not in the dark - flee!
+		} else {
+			remainingChaseTime = 0;
+			state = "fleeLight";
 		}
+		doMovement(delta, game);
+		setMask();	
+	}
 		
-		position.add(facing.normalise().scale(walkingSpeed*delta));
+	protected void doMovement(int delta, GameplayState game) {
+		//don't check for dying because the object has been deleted by now if the zom's dead.
+		float speed = walkingSpeed;
+		if (state.equals("fleeLight")) {
+			speed = (float)(chasingSpeed*1.3);
+			doFleeLightMovement(delta, game);
+		} else if (state.equals("pursueSurvivor")) {
+			speed = chasingSpeed;
+			doPursueSurvivorMovement(delta, game);
+		} else if (state.equals("pursuePlayer")) {
+			speed = chasingSpeed;
+			doPursuePlayerMovement(delta, game);
+		} else {
+			doWanderMovement(delta, game);
+		}
+		super.doMovement(delta, game, speed);
 		this.getAnimation().update(delta);
 	}
 	
-	private void doPursueEntityMovement(int delta, GameplayState game, Entity target) {
-		if (!getMask().intersects(target.getMask())) {
-			// First, obtain the vector towards the entity
-			facing = target.position.copy().sub(position);
-			if (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null)
-			{
-				// Try to walk towards the entity without going into a wall
-				facing = getVerticalAxisVectorTowardsEntity(target);
-				if (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null) {
-					facing = getHorizontalAxisVectorTowardsEntity(target);
-					if (collideWithWall(game.terrain, delta) || collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta)) != null) {
-						// If both fail, just resort to wandering
-						doWanderMovement(delta, game);
-						return;
-					}
-				}
-			}
-			position.add(facing.normalise().scale(chasingSpeed*delta));
-			this.getAnimation().update(delta*2);
+	private void doWanderMovement(int delta, GameplayState game) {
+		//send the merry zombie safely away from any nasty walls
+		//he might be colliding with. with a little random.
+		GridSpace wallCollision = collideWithWall(game.terrain, delta);
+		if (wallCollision != null) {
+			Vector2f safeHeading = faceAwayFrom(wallCollision);
+			facing = facing.add(rand.nextInt(60) - 60);
 		}
 	}
 	
-	
 	private void doPursuePlayerMovement(int delta, GameplayState game) {
 		doPursueEntityMovement(delta, game, GameplayState.player);
+		if (this.mask.intersects(GameplayState.player.getMask())) {
+			System.out.println("MUNCH MUNCH EAT YOUR BRAINS");
+		}
 	}
 	
 	private void doPursueSurvivorMovement(int delta, GameplayState game) {
@@ -137,7 +113,18 @@ public class ZombieEntity extends Entity {
 			doWanderMovement(delta, game);
 		}
 	}
-	
+	private void doFleeLightMovement(int delta, GameplayState game) {
+		SpotlightEntity spotlight = collideWithSpotlight(EntityManager.spotlightEntities.values(), delta, getNextMask(delta));
+		Shape flashlight = GameplayState.player.flashlight.illuminated(this);
+		
+		ArrayList<Shape> scaryThings = new ArrayList<Shape>();
+		Shape scaryLight1 = (spotlight != null) ? spotlight.getMask() : flashlight;
+		Shape scaryLight2 = (flashlight != null) ? flashlight : scaryLight1;
+		scaryThings.add(scaryLight1);
+		scaryThings.add(scaryLight2);
+		scaryThings.add(GameplayState.player.getMask());
+		facing = faceAwayFrom(scaryThings);
+	}
 	private SurvivorEntity getNearSurvivor(Collection<SurvivorEntity> survivors) {
 		for (SurvivorEntity s : survivors) {
 			if (getCenterPos().distance(s.getCenterPos()) < s.smellRadius) {
@@ -146,22 +133,6 @@ public class ZombieEntity extends Entity {
 		}
 		return null;
 	}
-	
-	
-	private Vector2f getVerticalAxisVectorTowardsEntity(Entity e) {
-		if (e.position.y < position.y)
-			return new Vector2f(0f, -1f);
-		else 
-			return new Vector2f(0f, 1f);
-	}
-	
-	private Vector2f getHorizontalAxisVectorTowardsEntity(Entity e) {
-		if (e.position.x < position.x)
-			return new Vector2f(-1f, 0f);
-		else 
-			return new Vector2f(1f, 0f);
-	}
-	
 
 	@Override
 	public void render(Graphics g) {
@@ -177,22 +148,6 @@ public class ZombieEntity extends Entity {
 		facingDown.setAutoUpdate(false);
 		facingUp = new Animation(ss, new int[] {0, 1, 1, 1, 0, 1, 2, 1}, new int[] {130, 200, 130, 200});
 		facingUp.setAutoUpdate(false);
-	}
-
-	@Override
-	public Shape getMask() {
-		mask.setLocation(position);
-		return mask;
-	}
-	
-	protected Shape getNextMask(int delta) {
-		float speed;
-		if (this.state == "pursuePlayer" || this.state == "pursueSurvivor")
-			speed = chasingSpeed;
-		else
-			speed = walkingSpeed;
-		Vector2f nextPos = position.copy().add(facing.normalise().scale(speed*delta));
-		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
 	}
 
 	private void die(int delta, PlayerEntity player) {

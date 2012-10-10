@@ -14,14 +14,14 @@ import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 
 
-public class PlayerEntity extends Entity {
+public class PlayerEntity extends MobileEntity {
 
 	Flashlight flashlight;
 	Circle light;
 	
 	//get loaded by config file
+	float smellRadius;
 	float lightRadius;
-	float walkingSpeed;
 	
 	Vector2f movement = new Vector2f(0f, 0f);
 	
@@ -34,17 +34,13 @@ public class PlayerEntity extends Entity {
 	
 	
 	public PlayerEntity(Entity parent, float x, float y) {
-		super(parent);
-		position = new Vector2f(x, y);
-		width = 16.0f;
-		height = 16.0f;
-		mask = new Rectangle(x, y, width, height);
+		super(parent, x, y);
 		
 		lightRadius = new Float(GameplayState.prop.getProperty("playerHaloRadius"));
 		walkingSpeed = new Float(GameplayState.prop.getProperty("playerSpeed"));
+		smellRadius = new Float(GameplayState.prop.getProperty("playerSmellRadius"));
 		
-		Vector2f center = this.getCenterPos();
-		light = new Circle(center.x, center.y, lightRadius);
+		light = new Circle(getCenterX(), getCenterY(), lightRadius);
 		flashlight = new Flashlight(this);
 	}
 
@@ -65,14 +61,14 @@ public class PlayerEntity extends Entity {
 			if (movement.equals(new Vector2f(0,0)) == false) {
 				// First, see if the regular direction collides with anything
 				
-				if (collideWithWall(game.terrain, delta)) {
+				if (collideWithWall(game.terrain, delta) != null) {
 					// Now, see if the horizontal component of the movement vector collides with anything
 					movement = new Vector2f(tempMovement.x, 0f);
-					if (collideWithWall(game.terrain, delta)) {
+					if (collideWithWall(game.terrain, delta) != null) {
 
 						// Lastly, see if the vertical component of the movement vector collides with anything
 						movement = new Vector2f(0f, tempMovement.y);
-						if ( !collideWithWall(game.terrain, delta) ) {
+						if (collideWithWall(game.terrain, delta) == null) {
 							position.add(movement);
 						}
 					} else {
@@ -136,7 +132,7 @@ public class PlayerEntity extends Entity {
 		// Check for command to survivors to follow the player
 		if (button == 0) {
 			for (SurvivorEntity e : EntityManager.survivorEntities.values()) {
-				if ( e.state.equals("wait") && flashlight.getMask().contains(e.getMask())) {
+				if ( e.state.equals("wait") && flashlight.illuminated(e) != null) {
 					e.setState("follow");
 				}
 			}
@@ -144,13 +140,12 @@ public class PlayerEntity extends Entity {
 	}
 	
 	private void centerLight() {
-		Vector2f center = getCenterPos();
-		light.setCenterX(center.x);
-		light.setCenterY(center.y);
+		light.setCenterX(getCenterX());
+		light.setCenterY(getCenterY());
 	}
 	
 	public float getSmellRadius() {
-		return light.radius;
+		return smellRadius;
 	}
 	
 }

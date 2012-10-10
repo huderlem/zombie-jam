@@ -35,17 +35,15 @@ public class Flashlight extends Entity {
 		power = new Integer(GameplayState.prop.getProperty("flashlightPower"));
 		reach = new Float(GameplayState.prop.getProperty("flashlightReach"));
 		angle = new Integer(GameplayState.prop.getProperty("flashlightAngle"));
-		setMask();
+		extendRays();
 	}
 
 	@Override
 	public void update(GameContainer gc, int delta, GameplayState game) {
-		super.update(gc, delta, game);
-		
+		super.update(gc, delta, game);		
 		position.set(parent.position.x + parent.width/2, parent.position.y + parent.height/2);
 		setDirection(game);
-		setMask();
-		extendRays(game);
+		extendRays();
 	}
 
 	@Override
@@ -72,27 +70,25 @@ public class Flashlight extends Entity {
 	}
 
 	@Override
+	//this method doesn't really make sense for flashlight. should never be used.
 	public Shape getMask() {
-		return mask;
+		return null;
 	}
-	
+	//instead, use this! illuminated, question mark?
+	public Polygon illuminated(Entity target){
+		for (Polygon lightMask : rays) {
+			if (lightMask.intersects(target.getMask())) return lightMask;
+		}
+		return null;
+	}
 	private void setMask() {
-		Vector2f beam = direction.copy().normalise().scale(power*reach);
-		Vector2f p1 = beam.copy().add(angle).add(position);
-		Vector2f p2 = beam.copy().sub(angle).add(position);
-		
-		Polygon mask = new Polygon();
-		mask.addPoint(position.x, position.y);
-		mask.addPoint(p1.x, p1.y);
-		mask.addPoint(p2.x, p2.y);
-		//mask.addPoint(position.x, position.y);
-		this.mask = mask;
+
 	}
 	
 	/*
 	 * Extends several rays out from the flashlight to handle lighting.  Also construct the light masks used for actually rendering the light/shadows.
 	 */
-	private void extendRays(GameplayState game) {
+	private void extendRays() {
 		// angle between each individual ray
 		double rayAngleSpacing = (2*angle)/((double)(numRays-1));
 		Vector2f prevRay = null;
@@ -101,7 +97,7 @@ public class Flashlight extends Entity {
 			
 			Vector2f rayDirection = direction.copy().sub(angle).add(rayAngleSpacing*i).normalise().scale(this.rayDelta);
 			// Actually move the ray...
-			ray = progressRay(game, ray, rayDirection);
+			ray = progressRay(ray, rayDirection);
 			// Create a Polygon mask from the last two rays
 			if (i > 0) {
 				Polygon rayChunk = new Polygon();
@@ -117,10 +113,10 @@ public class Flashlight extends Entity {
 	/*
 	 * Extends an individual ray forward until it hits and passes through a wall or hits its max length.  Tells GridSpaces to be drawn when it hits them.
 	 */
-	private Vector2f progressRay(GameplayState game, Vector2f ray, Vector2f rayDirection) {
+	private Vector2f progressRay(Vector2f ray, Vector2f rayDirection) {
 		float length = 0f;
 		int hitWallID = -1;
-		
+		GameplayState game = GameplayState.getGameplayState();
 		// keep extending the ray forward until it's run out of power
 		while (length < power*reach) {
 			ray.add(rayDirection);

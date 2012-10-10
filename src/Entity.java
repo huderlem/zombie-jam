@@ -58,6 +58,14 @@ public abstract class Entity {
 		return new Vector2f(position.x + width/2.0f, position.y + height/2.0f);
 	}
 	
+	public float getCenterX(){
+		return mask.getCenterX();
+	}
+	
+	public float getCenterY(){
+		return mask.getCenterY();
+	}
+	
 	public void delete() {
 		deleted = true;
 		EntityManager.removeEntity(this);
@@ -67,19 +75,14 @@ public abstract class Entity {
 	/*
 	 * Returns true if this entity collides with any wallEntity in the surrounding area.
 	 */
-	public boolean collideWithWall(World world, int delta) {
+	public GridSpace collideWithWall(World world, int delta) {
 		Shape nextMask = getNextMask(delta);
 		ArrayList<GridSpace> surroundingWalls = world.getSurroundingCellWalls(position.x, position.y);
 		for (GridSpace wall : surroundingWalls) {
 			Shape mask = wall.getMask();
-			if ( !(nextMask.getMaxY() <= mask.getMinY() ||
-					nextMask.getMinY() >= mask.getMaxY() ||
-					nextMask.getMaxX() <= mask.getMinX() ||
-					nextMask.getMinX() >= mask.getMaxX())) {
-				return true;
-			}
+			if (nextMask.intersects(mask)) return wall;
 		}
-		return false;
+		return null;
 	}
 	
 	/*

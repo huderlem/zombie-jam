@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -8,81 +9,68 @@ import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Vector2f;
 
 
-public class SurvivorEntity extends Entity {
+public class SurvivorEntity extends MobileEntity {
 
-	String state = "wait";
-	Vector2f facing = new Vector2f(1f, 0f);
-	Image texture;
+
+	float fleeSpeed;
+	float walkingSpeed;
 	
-	float walkingSpeed = 0.1f;
-	float smellRadius = 30.0f;
-	int life = 1000;
+	static float smellRadius;
 	
-	static int pointValue = 100;
+	static int fleeTime;
+	int remainingFleeTime;
+	String state;	
+	//holds a bunch of things the civ is fleeing from
+	Hashtable<Integer, Shape> runningFrom;
 	
 	public SurvivorEntity(Entity parent, float x, float y) {
-		super(parent);
+		super(parent, x, y);
 		EntityManager.addSurvivorEntity(this);
-		
-		position = new Vector2f(x, y);
-		width = 16.0f;
-		height = 16.0f;
-		mask = new Rectangle(position.x, position.y, width+1, height+1);
+		//from settings file
+		smellRadius = new Float(GameplayState.prop.getProperty("civSmellRadius"));
+		fleeSpeed = new Float(GameplayState.prop.getProperty("civFleeSpeed"));
+		walkingSpeed = new Float(GameplayState.prop.getProperty("civWalkSpeed"));
+		fleeTime = new Integer(GameplayState.prop.getProperty("civFleeTime"));
+		remainingFleeTime = 0;
+		runningFrom = new Hashtable<Integer, Shape>();
+		state = "wait";
 	}
 
 	@Override
 	public void update(GameContainer gc, int delta, GameplayState game) {
 		super.update(gc, delta, game);
-		
-		doMovement(delta, game);
-		setMask();
-		
+
 		// A survivor becomes "rescued" when the player touches it
 		if ( !state.equals("rescued") && getMask().intersects(GameplayState.player.getMask())) {
 			becomeRescued(game, GameplayState.player);
-		}
-		
+		}		
+		doMovement(delta, game);
+		setMask();	
 	}
 
-	private void doMovement(int delta, GameplayState game) {
-		if (state.equals("wait") || state.equals("rescued")) {
-			return;
+	protected void doMovement(int delta, GameplayState game) {
+		float speed = walkingSpeed;
+		if (state.equals("flee")) {
+			speed = fleeSpeed;
+			facing = faceAwayFrom(runningFrom.values());
 		} else if (state.equals("follow")) {
-			doPursuePlayerMovement(delta, game);
+			//chase the player
+			doPursueEntityMovement(delta, game, GameplayState.player);
+		//waiting or rescued
+		} else {
+			speed = 0;
 		}
-	}
-	
-	private void doPursuePlayerMovement(int delta, GameplayState game) {
-		// First, obtain the vector towards the player
-		facing = GameplayState.player.position.copy().sub(position);
-		if (collideWithWall(game.terrain, delta))
-		{
-			// Try to walk towards the player without going into a wall
-			facing = getVerticalAxisVectorTowardsPlayer(GameplayState.player);
-			if (collideWithWall(game.terrain, delta)) {
-				facing = getHorizontalAxisVectorTowardsPlayer(GameplayState.player);
-				if (collideWithWall(game.terrain, delta)) {
-					return;
-				}
-			}
-		}
+		remainingFleeTime -= 1*delta;
 		
-		position.add(facing.normalise().scale(walkingSpeed*delta));
-	}
-	
-	
-	private Vector2f getVerticalAxisVectorTowardsPlayer(PlayerEntity player) {
-		if (player.position.y < position.y)
-			return new Vector2f(0f, -1f);
-		else 
-			return new Vector2f(0f, 1f);
-	}
-	
-	private Vector2f getHorizontalAxisVectorTowardsPlayer(PlayerEntity player) {
-		if (player.position.x < position.x)
-			return new Vector2f(-1f, 0f);
-		else 
-			return new Vector2f(1f, 0f);
+		if (remainingFleeTime <= 0 && state.equals("flee")) {
+			if (runningFrom.size() >= 1) {
+				runningFrom = new Hashtable<Integer, Shape>();
+			}
+			remainingFleeTime = 0;
+			speed = 0;
+			state = "wait";
+		}
+		super.doMovement(delta, game, speed);
 	}
 	
 	@Override
@@ -96,39 +84,25 @@ public class SurvivorEntity extends Entity {
 		texture = TextureManager.getTexture("textures/green_life_1.png");
 	}
 
-	@Override
-	public Shape getMask() {
-		return mask;
-	}
-	
-	protected Shape getNextMask(int delta) {
-		Vector2f nextPos = position.copy().add(facing.normalise().scale(walkingSpeed*delta));
-		return new Rectangle(nextPos.x, nextPos.y, mask.getWidth(), mask.getHeight());
-	}
-	
-	private void setMask() {
-		mask.setLocation(position);
-	}
-
 	public void setState(String state) {
 		this.state = state;
 	}
-	
+	public void fleeFrom(Entity scaryThing) {
+		remainingFleeTime = fleeTime*GameplayState.pubDelta;
+		runningFrom.put(scaryThing.id(), scaryThing.getMask());
+		setState("flee");
+	}
 	public void becomeRescued(GameplayState game, PlayerEntity player) {
 		setState("rescued");
-		Vector2f center = getCenterPos();
-		this.addChild(new SpotlightEntity(this, center.x, center.y));
+		this.addChild(new SpotlightEntity(this, getCenterX(), getCenterY()));
 		game.survivorsLeft--;
-		player.score += SurvivorEntity.pointValue;
+		player.score += scoreValue;
 	}
 	
 	public void convertToZombie(GameplayState game, int delta) {
-		life -= delta;
-		if (life < 0) {
-			delete();
-			new ZombieEntity(null, position.x, position.y);
-			game.survivorsLeft--;
-		}
+		delete();
+		new ZombieEntity(null, position.x, position.y);
+		game.survivorsLeft--;
 	}
 	
 }

@@ -24,13 +24,17 @@ public class GameplayState extends BasicGameState{
  
 	private int stateID = -1;
 	
-	//a bunch of default values that get overridden by the config file
+	//these are populated by the config file on load
 	public int numSurvivors;
 	public int survivorsLeft = numSurvivors;
 	public int numZombies;	
 	
 	public int worldXdim;
 	public int worldYdim;
+	
+	static GameplayState me;
+	//so we can nab it whenever
+	static int pubDelta;
 	
 	static Properties prop = new Properties();
 	Random rand = new Random();
@@ -40,6 +44,7 @@ public class GameplayState extends BasicGameState{
 		
 	
 	public GameplayState(int stateID) {
+		me = this;
 		this.stateID = stateID;
 	}
       
@@ -74,7 +79,9 @@ public class GameplayState extends BasicGameState{
     	alphaG = alphaMap.getGraphics();
     	
 	}
-
+	public static GameplayState getGameplayState() {
+		return me;
+	}
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g)
 			throws SlickException {
@@ -176,7 +183,7 @@ public class GameplayState extends BasicGameState{
     		if (e.deleted == false)
     			e.update(gc, delta, this);
     	}
-    	
+    	pubDelta = delta;
     	EntityManager.syncEntities();
     	
     	/*if (this.survivorsLeft <= 0) {
